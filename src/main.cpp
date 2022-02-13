@@ -5,7 +5,7 @@
 ** main
 */
 
-#include "Zia.hpp"
+#include <iostream>
 
 int displayHelp()
 {
@@ -15,9 +15,9 @@ int displayHelp()
 
 int main(int ac, char **av)
 {
-    if (ac == 1 && av[1][0] == '-' && av[1][1] == 'h') return displayHelp();
-    Zia zia(ac == 1 ? "./config.json" : av[1]);
-    zia.configFileLoad();
+    if (ac == 2 && av[1][0] == '-' && av[1][1] == 'h') return displayHelp();
+
+    
 
     return (0);
 }

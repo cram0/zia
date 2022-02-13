@@ -1,0 +1,3 @@
+[submodule "zia-api"]
+	path = zia-api
+	url = git@github.com:4ntoninFille/zia-api.git

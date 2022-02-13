@@ -1,0 +1,48 @@
+Core :
+
+Le core s'occupe de relayer les informations entre les modules
+
+- Il peut tourner sans avoir aucun module de démarré
+- Il peut charger les modules sans qu'ils soient en marche
+- C'est lui qui s'occupe de load dynamiquement les librairies (à confirmer)
+- Il s'occupe de modifier la classe IConfig
+
+------
+
+Config:
+
+- La config originale est un fichier .json qui est parse à chaque modification de ce
+  dernier
+
+- La config (principalement) renvoie un vecteur des modulestypes qui sont écris
+  dans le .json
+
+- On peut accéder à la value d'une key avec l'overloading d'operateur[]
+
+------
+
+IModule:
+
+- load()/unload() => le module s'occupe de lui-même selon le fichier config (à confirmer)
+- Reçoit seulement les informations par le Core
+- 
+
+------
+
+Network:
+
+- Il écoute sur le port/ipaddr indiqué par le fichier de config
+
+------
+
+PhpCgi:
+
+- Lit un fichier .php et renvoie sur le stdout le .html (il faut recuperer le resultat)
+
+------
+
+SSL:
+
+Aucune idée
+
+------
