@@ -5,12 +5,19 @@
 ** Network
 */
 
-#include "IModule.hpp"
+#include "INetwork.hpp"
+#include "ICore.hpp"
+
+#include <sys/socket.h>
 
 Network::Network(ICore &coreRef)
 {
     core = &coreRef;
     type = ModuleType::NETWORK;
+    name = "test";
+    std::cout << "Network created" << std::endl;
+
+    
 }
 
 Network::~Network()
@@ -20,7 +27,7 @@ Network::~Network()
 
 void Network::run()
 {
-    
+    std::cout << "Network Loaded" << std::endl;
 }
 
 ICore *Network::getCore() const
@@ -28,7 +35,7 @@ ICore *Network::getCore() const
     return core;
 }
 
-void Network::receive(std::string const &msg)
+void Network::receive(std::any payload)
 {
 
 }
@@ -51,4 +58,8 @@ std::string Network::getName() const
 ModuleType Network::getType() const
 {
     return type;
+}
+
+extern "C" Network *getNetworkModule(ICore &coreRef) {
+    return (new Network(coreRef));
 }

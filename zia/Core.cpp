@@ -7,9 +7,12 @@
 
 #include "ICore.hpp"
 
+#include <dlfcn.h>
+
 Core::Core()
 {
-
+    std::cout << "Core created" << std::endl;
+    handle = nullptr;
 }
 
 Core::~Core()
@@ -39,7 +42,24 @@ void Core::listModules() const
 
 void Core::registerModule(ModuleType type)
 {
+    char *error;
+    IModule *(*tmp)();
+    handle = dlopen("../modules/network/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
 
+    if (!handle) {
+        fprintf(stderr, "%s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+
+    *(void **)(&tmp) = dlsym(handle, "getNetworkModule");
+
+    if ((error = dlerror()) != NULL)  {
+        fprintf(stderr, "%s\n", error);
+        exit(EXIT_FAILURE);
+    }
+
+    std::cout << (*tmp)()->getName() << std::endl;
+    
 }
 
 void Core::unregisterModule(ModuleType type)

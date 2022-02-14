@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include "ICore.hpp"
+
 int displayHelp()
 {
     std::cout << "Help..";
@@ -17,7 +19,9 @@ int main(int ac, char **av)
 {
     if (ac == 2 && av[1][0] == '-' && av[1][1] == 'h') return displayHelp();
 
-    
+    Core core;
+
+    core.registerModule(ModuleType::NETWORK);
 
     return (0);
 }

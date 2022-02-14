@@ -1,6 +1,7 @@
 {
     "modules": {
         "PhpCgi" : {
+            "modulepath" : "///",
             "xxx" : "test",
             "path" : ""
         },
