@@ -1,3 +1,8 @@
+/!\ IMPORTANT /!\ :
+
+-- Penser à rajouter "#include <any>" dans le ICore.hpp après un git submodule init
+
+
 Core :
 
 Le core s'occupe de relayer les informations entre les modules
@@ -25,7 +30,7 @@ IModule:
 
 - load()/unload() => le module s'occupe de lui-même selon le fichier config (à confirmer)
 - Reçoit seulement les informations par le Core
-- 
+-
 
 ------
 
