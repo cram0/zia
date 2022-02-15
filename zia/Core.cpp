@@ -59,7 +59,7 @@ void Core::registerModule(ModuleType type)
     }
 
     std::cout << (*tmp)()->getName() << std::endl;
-    
+
 }
 
 void Core::unregisterModule(ModuleType type)
