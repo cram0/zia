@@ -18,6 +18,7 @@
 #include <istream>
 #include <string>
 #include <cstring>
+#include <thread>
 
 Network::Network(ICore &coreRef)
 {
@@ -82,7 +83,7 @@ void Network::run()
         std::cout << "Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &conn_addr_len);
 
-
+        int pid;
         int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
         recv_msg += buf;
 
@@ -92,12 +93,17 @@ void Network::run()
             recv_msg += buf;
         }
 
-        std::cout << recv_msg << std::endl;
+        std::string request_type, request_file, request_version;
 
-        std::stringstream response("<h1>404 Content not found</h1>");
-        std::ifstream f_html("../../test.html");
+        std::istringstream iss(recv_msg);
+        iss >> request_type >> request_file >> request_version;
+        std::cout << request_type << request_file << request_version << std::endl;
+
+        std::stringstream response("<h1>404 File not found</h1>");
+        std::ifstream f_html("../../www" + request_file);
 
         if (f_html.good()) {
+            response.str("");
             response.clear();
             response << f_html.rdbuf();
         }
