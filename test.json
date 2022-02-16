@@ -1,13 +1,15 @@
 {
     "modules": {
-        "PhpCgi" : {
-            "modulepath" : "///",
-            "xxx" : "test",
-            "path" : ""
-        },
         "Network" : {
             "ip" : "localhost",
-            "port" : "8080"
+            "port" : "8080",
+            "root" : "www"
+        },
+        "PhpCgi" : {
+            "binary" : "php-cgi"
+        },
+        "SSL" : {
+            "xxx" : "xxx"
         }
     }
 }

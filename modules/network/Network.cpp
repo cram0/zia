@@ -12,6 +12,12 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fstream>
+#include <sstream>
+#include <ostream>
+#include <istream>
+#include <string>
+#include <cstring>
 
 Network::Network(ICore &coreRef)
 {
@@ -35,9 +41,23 @@ void Network::run()
     server.sin_port = htons(11111);
     server.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    char buf[4096];
+    int CHUNK_SIZE = 4096;
     int s_conn = -1;
+    int enable = 1;
     int s_listen = socket(AF_INET, SOCK_STREAM, 0);
+
+    // Supprimer en production //
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+        exit(1);
+    }
+
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        std::cerr << "setsockopt(SO_REUSEPORT) failed" << std::endl;
+        exit(1);
+    }
+    // Supprimer en production //
+
     if (s_listen == -1) {
         std::cerr << "Socket creation error" << std::endl;
         exit(1);
@@ -56,13 +76,40 @@ void Network::run()
     while(42) {
         sockaddr_in conn_addr;
         socklen_t conn_addr_len;
+        std::string recv_msg;
+        char buf[CHUNK_SIZE] = {0};
 
         std::cout << "Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &conn_addr_len);
 
 
-        recv(s_conn, buf, 4096, 0);
-        std::cout << buf << std::endl;
+        int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
+        recv_msg += buf;
+
+        while (recv_size == CHUNK_SIZE) {
+            memset(buf, 0, CHUNK_SIZE);
+            recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
+            recv_msg += buf;
+        }
+
+        std::cout << recv_msg << std::endl;
+
+        std::stringstream response("<h1>404 Content not found</h1>");
+        std::ifstream f_html("../../test.html");
+
+        if (f_html.good()) {
+            response.clear();
+            response << f_html.rdbuf();
+        }
+
+        std::ostringstream stream;
+        stream << "HTTP/1.1 200 OK\r\n";
+        stream << "Content-Type: text/html\r\n";
+        stream << "Content-Length: " << response.str().length();
+        stream << "\r\n\r\n";
+        stream << response.str();
+        send(s_conn, stream.str().c_str(), 4096, 0);
+        close(s_conn);
     }
 }
 
