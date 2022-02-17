@@ -83,7 +83,6 @@ void Network::run()
         std::cout << "Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &conn_addr_len);
 
-        int pid;
         int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
         recv_msg += buf;
 
@@ -93,11 +92,12 @@ void Network::run()
             recv_msg += buf;
         }
 
-        std::string request_type, request_file, request_version;
+        std::string request_method, request_file, request_version;
 
         std::istringstream iss(recv_msg);
-        iss >> request_type >> request_file >> request_version;
-        std::cout << request_type << request_file << request_version << std::endl;
+        iss >> request_method >> request_file >> request_version;
+
+        std::cout << request_method << request_file << request_version << std::endl;
 
         std::stringstream response("<h1>404 File not found</h1>");
         std::ifstream f_html("../../www" + request_file);
