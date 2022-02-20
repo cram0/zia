@@ -1,3 +1,7 @@
 build/
 *.o
 .vscode/
+www/*.png
+www/*.jpeg
+www/*.jpg
+www/file.txt

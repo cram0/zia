@@ -19,20 +19,47 @@
 #include <string>
 #include <cstring>
 #include <thread>
+#include <filesystem>
+#include <fcntl.h>
+#include <iomanip>
 
-Network::Network(ICore &coreRef)
+Network::Network()
 {
-    core = &coreRef;
     type = ModuleType::NETWORK;
     name = "NetworkName";
     std::cout << "Network created" << std::endl;
+    core = nullptr;
 
+    init();
     run();
+}
+
+Network::Network(ICore &coreRef) : Network()
+{
+    core = &coreRef;
 }
 
 Network::~Network()
 {
 
+}
+
+void Network::init()
+{
+    contentTypeMap.emplace(std::make_pair(".txt", "text/plain"));
+    contentTypeMap.emplace(std::make_pair(".html", "text/html"));
+    contentTypeMap.emplace(std::make_pair(".css", "text/css"));
+    contentTypeMap.emplace(std::make_pair(".js", "application/javascript"));
+    contentTypeMap.emplace(std::make_pair(".json", "application/json"));
+    contentTypeMap.emplace(std::make_pair(".pdf", "application/pdf"));
+    contentTypeMap.emplace(std::make_pair(".jpg", "image/jpeg"));
+    contentTypeMap.emplace(std::make_pair(".jpeg", "image/jpeg"));
+    contentTypeMap.emplace(std::make_pair(".png", "image/png"));
+}
+
+const std::string Network::getContentType(const std::string &file_extension)
+{
+    return (contentTypeMap[file_extension]);
 }
 
 void Network::run()
@@ -83,6 +110,10 @@ void Network::run()
         std::cout << "Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &conn_addr_len);
 
+        if (s_conn == -1) {
+            std::cerr << "Accept error" << std::endl;
+        }
+
         int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
         recv_msg += buf;
 
@@ -97,24 +128,36 @@ void Network::run()
         std::istringstream iss(recv_msg);
         iss >> request_method >> request_file >> request_version;
 
-        std::cout << request_method << request_file << request_version << std::endl;
+        std::cout << " " <<  request_method << " " << request_file << " " << request_version << std::endl;
 
-        std::stringstream response("<h1>404 File not found</h1>");
-        std::ifstream f_html("../../www" + request_file);
+        std::string full_path = "../../www" + request_file;
+        std::string file_extension = std::filesystem::path(full_path).extension();
 
-        if (f_html.good()) {
-            response.str("");
-            response.clear();
-            response << f_html.rdbuf();
+        if (file_extension == ".php") {
+            getCore()->send(full_path, ModuleType::PHP_CGI);
+            
         }
 
+        std::ifstream file_data(full_path);
         std::ostringstream stream;
-        stream << "HTTP/1.1 200 OK\r\n";
-        stream << "Content-Type: text/html\r\n";
-        stream << "Content-Length: " << response.str().length();
-        stream << "\r\n\r\n";
-        stream << response.str();
-        send(s_conn, stream.str().c_str(), 4096, 0);
+
+        if (file_data.good()) {
+            std::stringstream data;
+            data << file_data.rdbuf();
+            stream << "HTTP/1.1 200 OK\r\n";
+            stream << "Content-Length: " << data.str().length() << "\r\n";
+            stream << "Content-Type: "<< getContentType(file_extension);
+            stream << "\r\n\r\n";
+            stream << data.str();
+        }
+        else {
+            stream << "HTTP/1.1 404 NOT FOUND\r\n";
+            stream << "Content-Length: " << 0;
+            stream << "\r\n\r\n";
+        }
+
+        send(s_conn, stream.str().c_str(), stream.str().length(), 0);
+
         close(s_conn);
     }
 }
@@ -122,6 +165,11 @@ void Network::run()
 ICore *Network::getCore() const
 {
     return core;
+}
+
+void Network::setCore(ICore &coreRef)
+{
+    core = &coreRef;
 }
 
 void Network::receive(std::any payload)

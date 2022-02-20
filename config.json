@@ -2,7 +2,7 @@
     "modules": {
         "Network" : {
             "ip" : "localhost",
-            "port" : "8080",
+            "port" : "11111",
             "root" : "www"
         },
         "PhpCgi" : {

@@ -9,3 +9,4 @@ project(zia VERSION 1.0)
 
 add_subdirectory(zia)
 add_subdirectory(modules/network)
+add_subdirectory(modules/php)

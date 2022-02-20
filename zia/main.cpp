@@ -21,7 +21,7 @@ int main(int ac, char **av)
 
     Core core;
 
-    core.registerModule(ModuleType::NETWORK);
+    core.registerModule(ModuleType::PHP_CGI);
 
     return (0);
 }
