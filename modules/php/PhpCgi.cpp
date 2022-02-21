@@ -38,9 +38,9 @@ ICore *PhpCgi::getCore() const
     return core;
 }
 
-void PhpCgi::setCore(ICore *coreRef)
+void PhpCgi::setCore(ICore &coreRef)
 {
-    core = coreRef;
+    core = &coreRef;
 }
 
 void PhpCgi::receive(std::any payload)
@@ -64,6 +64,7 @@ void PhpCgi::receive(std::any payload)
 
     pclose(f);
     std::cout << f_data << std::endl;
+    getCore()->send(f_data, ModuleType::NETWORK);
 }
 
 bool PhpCgi::load()

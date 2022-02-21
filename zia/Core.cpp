@@ -58,6 +58,7 @@ void Core::registerModule(ModuleType type)
 
         *(void **)(&tmp) = dlsym(handle, "createNetworkModule");
     }
+
     if (type == ModuleType::PHP_CGI) {
         handle = dlopen("../modules/php/libphp.so", RTLD_LAZY | RTLD_LOCAL);
 
@@ -84,10 +85,10 @@ void Core::registerModule(ModuleType type)
             exit(EXIT_FAILURE);
     }
 
-    (*tmp)();
-    // mod->setCore(this);
+    IModule *pp = (*tmp)();
+    pp->setCore(*this);
 
-    modules.emplace(std::make_pair(type, mod));
+    modules.emplace(std::make_pair(type, pp));
     modules_handles.emplace(std::make_pair(type, handle));
 }
 

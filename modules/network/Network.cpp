@@ -45,15 +45,7 @@ Network::~Network()
 
 void Network::init()
 {
-    contentTypeMap.emplace(std::make_pair(".txt", "text/plain"));
-    contentTypeMap.emplace(std::make_pair(".html", "text/html"));
-    contentTypeMap.emplace(std::make_pair(".css", "text/css"));
-    contentTypeMap.emplace(std::make_pair(".js", "application/javascript"));
-    contentTypeMap.emplace(std::make_pair(".json", "application/json"));
-    contentTypeMap.emplace(std::make_pair(".pdf", "application/pdf"));
-    contentTypeMap.emplace(std::make_pair(".jpg", "image/jpeg"));
-    contentTypeMap.emplace(std::make_pair(".jpeg", "image/jpeg"));
-    contentTypeMap.emplace(std::make_pair(".png", "image/png"));
+
 }
 
 const std::string Network::getContentType(const std::string &file_extension)
@@ -67,7 +59,6 @@ void Network::run()
     server.sin_family = AF_INET;
     server.sin_port = htons(11111);
     server.sin_addr.s_addr = htonl(INADDR_ANY);
-
 
     int CHUNK_SIZE = 4096;
     int s_conn = -1;
@@ -135,6 +126,7 @@ void Network::run()
 
         if (file_extension == ".php") {
             getCore()->send(full_path, ModuleType::PHP_CGI);
+
             // TODO
         }
 
@@ -167,14 +159,14 @@ ICore *Network::getCore() const
     return core;
 }
 
-void Network::setCore(ICore *coreRef)
+void Network::setCore(ICore &coreRef)
 {
-    core = coreRef;
+    core = &coreRef;
 }
 
 void Network::receive(std::any payload)
 {
-
+    
 }
 
 bool Network::load()

@@ -22,7 +22,7 @@ int main(int ac, char **av)
     core.registerModule(ModuleType::PHP_CGI);
     core.registerModule(ModuleType::NETWORK);
     IModule *mod = core.getModule(ModuleType::NETWORK);
-    INetwork *pp = (INetwork *)mod;
+    Network *pp = (Network *)mod;
     if (pp != nullptr) {
         std::cout << "Before run" << std::endl;
         pp->run();
