@@ -31,7 +31,6 @@ Network::Network()
     core = nullptr;
 
     init();
-    run();
 }
 
 Network::Network(ICore &coreRef) : Network()
@@ -69,6 +68,7 @@ void Network::run()
     server.sin_port = htons(11111);
     server.sin_addr.s_addr = htonl(INADDR_ANY);
 
+
     int CHUNK_SIZE = 4096;
     int s_conn = -1;
     int enable = 1;
@@ -102,8 +102,8 @@ void Network::run()
     }
 
     while(42) {
-        sockaddr_in conn_addr;
-        socklen_t conn_addr_len;
+        sockaddr_in conn_addr = {0};
+        socklen_t conn_addr_len = {0};
         std::string recv_msg;
         char buf[CHUNK_SIZE] = {0};
 
@@ -135,7 +135,7 @@ void Network::run()
 
         if (file_extension == ".php") {
             getCore()->send(full_path, ModuleType::PHP_CGI);
-            
+            // TODO
         }
 
         std::ifstream file_data(full_path);
@@ -167,9 +167,9 @@ ICore *Network::getCore() const
     return core;
 }
 
-void Network::setCore(ICore &coreRef)
+void Network::setCore(ICore *coreRef)
 {
-    core = &coreRef;
+    core = coreRef;
 }
 
 void Network::receive(std::any payload)
@@ -197,6 +197,6 @@ ModuleType Network::getType() const
     return type;
 }
 
-extern "C" Network *getNetworkModule(ICore &coreRef) {
+extern "C" Network *createNetworkModule(ICore &coreRef) {
     return (new Network(coreRef));
 }

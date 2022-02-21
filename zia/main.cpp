@@ -5,8 +5,6 @@
 ** main
 */
 
-#include <iostream>
-
 #include "ICore.hpp"
 
 int displayHelp()
@@ -22,6 +20,14 @@ int main(int ac, char **av)
     Core core;
 
     core.registerModule(ModuleType::PHP_CGI);
+    core.registerModule(ModuleType::NETWORK);
+    IModule *mod = core.getModule(ModuleType::NETWORK);
+    INetwork *pp = (INetwork *)mod;
+    if (pp != nullptr) {
+        std::cout << "Before run" << std::endl;
+        pp->run();
+        std::cout << "After run" << std::endl;
+    }
 
     return (0);
 }

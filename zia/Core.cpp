@@ -44,9 +44,9 @@ IModule *Core::getModule(ModuleType type) const
 
 void Core::registerModule(ModuleType type)
 {
-    char *error;
-    IModule *(*tmp)();
-    void *handle;
+    char *error = nullptr;
+    IModule *(*tmp)() = nullptr;
+    void *handle = nullptr;
 
     if (type == ModuleType::NETWORK) {
         handle = dlopen("../modules/network/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
@@ -56,7 +56,7 @@ void Core::registerModule(ModuleType type)
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "getNetworkModule");
+        *(void **)(&tmp) = dlsym(handle, "createNetworkModule");
     }
     if (type == ModuleType::PHP_CGI) {
         handle = dlopen("../modules/php/libphp.so", RTLD_LAZY | RTLD_LOCAL);
@@ -66,7 +66,7 @@ void Core::registerModule(ModuleType type)
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "getPhpCgiModule");
+        *(void **)(&tmp) = dlsym(handle, "createPhpCgiModule");
     }
     if (type == ModuleType::SSL) {
         handle = dlopen("../modules/ssl/libssl.so", RTLD_LAZY | RTLD_LOCAL);
@@ -76,18 +76,19 @@ void Core::registerModule(ModuleType type)
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "getSSLModule");
+        *(void **)(&tmp) = dlsym(handle, "createSSLModule");
     }
 
     if ((error = dlerror()) != NULL)  {
             fprintf(stderr, "%s\n", error);
             exit(EXIT_FAILURE);
-        }
+    }
 
-    modules.emplace(std::make_pair(type, (*tmp)()));
+    (*tmp)();
+    // mod->setCore(this);
+
+    modules.emplace(std::make_pair(type, mod));
     modules_handles.emplace(std::make_pair(type, handle));
-
-    std::cout << (*tmp)()->getName() << std::endl;
 }
 
 void Core::unregisterModule(ModuleType type)

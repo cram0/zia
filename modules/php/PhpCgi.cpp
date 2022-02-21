@@ -20,7 +20,7 @@ PhpCgi::PhpCgi()
     name = "PhpCgiName";
     std::cout << "PhpCgi created" << std::endl;
 
-    receive(std::string("../../www/test.php"));
+    // receive(std::string("../../www/test.php"));
 }
 
 PhpCgi::PhpCgi(ICore &coreRef) : PhpCgi()
@@ -38,9 +38,9 @@ ICore *PhpCgi::getCore() const
     return core;
 }
 
-void PhpCgi::setCore(ICore &coreRef)
+void PhpCgi::setCore(ICore *coreRef)
 {
-    core = &coreRef;
+    core = coreRef;
 }
 
 void PhpCgi::receive(std::any payload)
@@ -86,6 +86,6 @@ ModuleType PhpCgi::getType() const
     return type;
 }
 
-extern "C" PhpCgi *getPhpCgiModule(ICore &coreRef) {
+extern "C" PhpCgi *createPhpCgiModule(ICore &coreRef) {
     return (new PhpCgi(coreRef));
 }
