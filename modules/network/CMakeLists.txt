@@ -8,6 +8,7 @@ project(network VERSION 1.0)
 
 add_library(network SHARED
     Network.cpp
+    Request.cpp
 )
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)

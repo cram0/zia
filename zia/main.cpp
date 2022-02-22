@@ -5,7 +5,7 @@
 ** main
 */
 
-#include "ICore.hpp"
+#include "Network.hpp"
 
 int displayHelp()
 {
@@ -21,12 +21,9 @@ int main(int ac, char **av)
 
     core.registerModule(ModuleType::PHP_CGI);
     core.registerModule(ModuleType::NETWORK);
-    IModule *mod = core.getModule(ModuleType::NETWORK);
-    Network *pp = (Network *)mod;
-    if (pp != nullptr) {
-        std::cout << "Before run" << std::endl;
-        pp->run();
-        std::cout << "After run" << std::endl;
+    Network *net = (Network *)core.getModule(ModuleType::NETWORK);
+    if (net != nullptr) {
+        net->run();
     }
 
     return (0);

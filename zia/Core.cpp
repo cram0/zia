@@ -58,7 +58,6 @@ void Core::registerModule(ModuleType type)
 
         *(void **)(&tmp) = dlsym(handle, "createNetworkModule");
     }
-
     if (type == ModuleType::PHP_CGI) {
         handle = dlopen("../modules/php/libphp.so", RTLD_LAZY | RTLD_LOCAL);
 

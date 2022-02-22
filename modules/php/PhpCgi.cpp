@@ -6,6 +6,7 @@
 */
 
 #include "IModule.hpp"
+#include "Request.hpp"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -45,14 +46,14 @@ void PhpCgi::setCore(ICore &coreRef)
 
 void PhpCgi::receive(std::any payload)
 {
-    std::string content = std::any_cast<std::string>(payload);
+    Request request = std::any_cast<Request>(payload);
     std::string f_data;
     ssize_t pread_size = 0;
     int CHUNK_SIZE = 4096;
     char buf[CHUNK_SIZE] = {0};
 
     FILE *f;
-    f = popen(std::string("php-cgi " + content).c_str(), "r");
+    f = popen(std::string("php-cgi " + request.getFilePath()).c_str(), "r");
     pread_size = fread(buf, 1, CHUNK_SIZE, f);
     f_data += buf;
 
@@ -63,8 +64,8 @@ void PhpCgi::receive(std::any payload)
     }
 
     pclose(f);
-    std::cout << f_data << std::endl;
-    getCore()->send(f_data, ModuleType::NETWORK);
+    request.setData(f_data);
+    getCore()->send(request, ModuleType::NETWORK);
 }
 
 bool PhpCgi::load()
@@ -87,6 +88,6 @@ ModuleType PhpCgi::getType() const
     return type;
 }
 
-extern "C" PhpCgi *createPhpCgiModule(ICore &coreRef) {
-    return (new PhpCgi(coreRef));
+extern "C" PhpCgi *createPhpCgiModule() {
+    return (new PhpCgi());
 }

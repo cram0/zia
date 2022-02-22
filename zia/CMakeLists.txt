@@ -12,9 +12,10 @@ add_executable(zia
     Config.cpp
 )
 
+target_link_libraries(zia PUBLIC network)
+
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../zia-api)
-
-# # Conan
-# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-# conan_basic_setup(TARGETS)
+target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/network)
+target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/php)
+target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ssl)
