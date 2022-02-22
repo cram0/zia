@@ -70,7 +70,7 @@ void Network::processRequest(int s_conn)
     std::istringstream iss(recv_msg);
     iss >> request_method >> request_file >> request_version;
 
-    std::cout << " " <<  request_method << " " << request_file << " " << request_version << std::endl;
+    std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "../../www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension();
@@ -101,6 +101,7 @@ void Network::processRequest(int s_conn)
         response << "\r\n\r\n";
 
         send(s_conn, response.str().c_str(), response.str().length(), 0);
+        close(s_conn);
         return;
     }
 }
