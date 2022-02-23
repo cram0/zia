@@ -179,8 +179,10 @@ void Network::receive(std::any payload)
 
     stream << "HTTP/1.1 200 OK\r\n";
     stream << "Content-Length: " << request.getData().length() << "\r\n";
-    stream << "Content-Type: "<< getContentType(f_extension);
-    stream << "\r\n\r\n";
+    if (f_extension != ".php") {
+        stream << "Content-Type: "<< getContentType(f_extension);
+        stream << "\r\n\r\n";
+    }
     stream << request.getData();
 
     send(request.getSocket(), stream.str().c_str(), stream.str().length(), 0);
