@@ -1,4 +1,5 @@
 [requires]
+openssl/3.0.1
 
 [generators]
 cmake

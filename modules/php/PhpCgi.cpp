@@ -5,7 +5,7 @@
 ** PhpCgi
 */
 
-#include "IModule.hpp"
+#include "PhpCgi.hpp"
 #include "Request.hpp"
 
 #include <unistd.h>
