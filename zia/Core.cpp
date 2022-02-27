@@ -5,7 +5,7 @@
 ** Core
 */
 
-#include "ICore.hpp"
+#include "Core.hpp"
 
 #include <dlfcn.h>
 
@@ -68,7 +68,7 @@ void Core::registerModule(ModuleType type)
 
         *(void **)(&tmp) = dlsym(handle, "createPhpCgiModule");
     }
-    if (type == ModuleType::SSL) {
+    if (type == ModuleType::SSLmod) {
         handle = dlopen("../modules/ssl/libssl.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {

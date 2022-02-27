@@ -20,8 +20,6 @@ PhpCgi::PhpCgi()
     type = ModuleType::PHP_CGI;
     name = "PhpCgiName";
     std::cout << "PhpCgi created" << std::endl;
-
-    // receive(std::string("../../www/test.php"));
 }
 
 PhpCgi::PhpCgi(ICore &coreRef) : PhpCgi()

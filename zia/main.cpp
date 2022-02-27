@@ -6,6 +6,7 @@
 */
 
 #include "Network.hpp"
+#include "Core.hpp"
 
 int displayHelp()
 {

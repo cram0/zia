@@ -24,6 +24,9 @@
 #include <iomanip>
 #include <thread>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 Network::Network()
 {
     type = ModuleType::NETWORK;
@@ -56,6 +59,56 @@ void Network::processRequest(int s_conn)
 {
     std::string recv_msg;
     char buf[CHUNK_SIZE] = {0};
+
+    SSL_library_init();
+    SSL_load_error_strings();
+    OpenSSL_add_all_algorithms();
+
+    // Verifier si SSL/TLS ou non
+
+    // Creation du context SSL
+    SSL_CTX* ctx;
+
+    const SSL_METHOD *method;
+    method = TLS_server_method();
+    ctx = SSL_CTX_new(method);
+
+    if (!ctx) {
+        perror("Unable to create SSL context");
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    BIO *bio = BIO_new_ssl_connect(ctx);
+    SSL *ssl = nullptr;
+    ssl = SSL_new(ctx);
+    SSL_set_fd(ssl, s_conn);
+
+    if (SSL_accept(ssl) <= 0) {
+        ERR_print_errors_fp(stderr);
+    }
+
+    int ssl_read_size = SSL_read(ssl, buf, CHUNK_SIZE);
+    recv_msg += buf;
+
+    while (ssl_read_size == CHUNK_SIZE) {
+        memset(buf, 0, CHUNK_SIZE);
+        ssl_read_size = SSL_read(ssl, buf, CHUNK_SIZE);
+        recv_msg += buf;
+    }
+
+    std::cout << recv_msg << std::endl;
+
+    SSL_shutdown(ssl);
+    SSL_free(ssl);
+    SSL_CTX_free(ctx);
+    close(s_conn);
+
+    return;
+
+    // SSL
+
+
     int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
     recv_msg += buf;
 
@@ -66,6 +119,8 @@ void Network::processRequest(int s_conn)
     }
 
     std::string request_method, request_file, request_version;
+
+    std::cout << recv_msg << std::endl;
 
     std::istringstream iss(recv_msg);
     iss >> request_method >> request_file >> request_version;
