@@ -46,8 +46,8 @@ void PhpCgi::receive(std::any payload)
 {
     Request request = std::any_cast<Request>(payload);
     std::string f_data;
-    ssize_t pread_size = 0;
-    int CHUNK_SIZE = 4096;
+    size_t pread_size = 0;
+    const short CHUNK_SIZE = 4096;
     char buf[CHUNK_SIZE] = {0};
 
     FILE *f;

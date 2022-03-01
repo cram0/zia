@@ -104,6 +104,6 @@ static std::unordered_map<std::string, std::string> contentTypeMap = {
     {".7z", "application/x-7z-compressed"}
 };
 
-static size_t CHUNK_SIZE = 4096;
+static const short CHUNK_SIZE = 4096;
 
 #endif /* !NETWORK_HPP_ */
