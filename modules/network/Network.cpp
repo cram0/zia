@@ -10,8 +10,11 @@
 #include "ISsl.hpp"
 
 #include <sys/socket.h>
+
+// Remplacer ces librairies pour la structure sockaddr_in
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
@@ -112,10 +115,14 @@ void Network::processRequest(int s_conn)
 
 void Network::run()
 {
+    // Seulement pour Linux
     sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(11111);
     server.sin_addr.s_addr = htonl(INADDR_ANY);
+    //
+    // Il faut trouver un équivalent pour sockaddr_in
+    // Il faut trouver un équivalent pour htons() et htonl()
 
     int CHUNK_SIZE = 4096;
     int s_conn = -1;
@@ -150,7 +157,9 @@ void Network::run()
     }
 
     while(42) {
+        // Seulement sur Linux
         sockaddr_in conn_addr = {0};
+        //
         socklen_t conn_addr_len = {0};
 
         std::cout << "Awaiting connections ..." << std::endl;
