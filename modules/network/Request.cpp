@@ -14,10 +14,11 @@ Request::Request()
 
 }
 
-Request::Request(int socket, const std::string &file_path)
+Request::Request(int socket, const std::string &file_path, SSL *ssl)
 {
     m_socket = socket;
     m_file_path = file_path;
+    m_ssl = ssl;
 }
 
 const std::string Request::getFilePath() const
@@ -48,6 +49,16 @@ const int Request::getSocket() const
 void Request::setSocket(int socket)
 {
     m_socket = socket;
+}
+
+SSL *Request::getSsl() const
+{
+    return m_ssl;
+}
+
+void Request::setSsl(SSL *ssl)
+{
+    m_ssl = ssl;
 }
 
 Request::~Request()

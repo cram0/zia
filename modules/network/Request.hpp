@@ -13,10 +13,12 @@
 #include <string.h>
 #include <sys/socket.h>
 
+#include <openssl/ssl.h>
+
 class Request {
     public:
         Request();
-        Request(int socket, const std::string &file_path);
+        Request(int socket, const std::string &file_path, SSL *ssl);
 
         const std::string getFilePath() const;
         void setFilePath(const std::string &file_path);
@@ -26,6 +28,9 @@ class Request {
 
         const int getSocket() const;
         void setSocket(int socket);
+
+        SSL *getSsl() const;
+        void setSsl(SSL *ssl);
         ~Request();
 
     protected:
@@ -34,6 +39,7 @@ class Request {
         std::string m_file_path;
         bool m_file_valid;
         int m_socket;
+        SSL* m_ssl = nullptr;
 };
 
 #endif /* !REQUEST_HPP_ */

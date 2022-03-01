@@ -63,10 +63,13 @@ void PhpCgi::receive(std::any payload)
 
     pclose(f);
     request.setData(f_data);
-    getCore()->send(request, ModuleType::NETWORK);
+    if (request.getSsl() == nullptr)
+        getCore()->send(request, ModuleType::NETWORK);
+    else
+        getCore()->send(request, ModuleType::SSL_MODULE);
 }
 
-bool PhpCgi::load()
+bool PhpCgi::load(std::any payload)
 {
     return true;
 }

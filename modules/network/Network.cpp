@@ -7,6 +7,7 @@
 
 #include "Network.hpp"
 #include "Request.hpp"
+#include "ISsl.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -24,9 +25,6 @@
 #include <iomanip>
 #include <thread>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 Network::Network()
 {
     type = ModuleType::NETWORK;
@@ -42,7 +40,7 @@ Network::Network(ICore &coreRef) : Network()
 
 Network::~Network()
 {
-
+    std::cout << "Network destroyed" << std::endl;
 }
 
 void Network::init()
@@ -59,55 +57,6 @@ void Network::processRequest(int s_conn)
 {
     std::string recv_msg;
     char buf[CHUNK_SIZE] = {0};
-
-    SSL_library_init();
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
-
-    // Verifier si SSL/TLS ou non
-
-    // Creation du context SSL
-    SSL_CTX* ctx;
-
-    const SSL_METHOD *method;
-    method = TLS_server_method();
-    ctx = SSL_CTX_new(method);
-
-    if (!ctx) {
-        perror("Unable to create SSL context");
-        ERR_print_errors_fp(stderr);
-        exit(EXIT_FAILURE);
-    }
-
-    BIO *bio = BIO_new_ssl_connect(ctx);
-    SSL *ssl = nullptr;
-    ssl = SSL_new(ctx);
-    SSL_set_fd(ssl, s_conn);
-
-    if (SSL_accept(ssl) <= 0) {
-        ERR_print_errors_fp(stderr);
-    }
-
-    int ssl_read_size = SSL_read(ssl, buf, CHUNK_SIZE);
-    recv_msg += buf;
-
-    while (ssl_read_size == CHUNK_SIZE) {
-        memset(buf, 0, CHUNK_SIZE);
-        ssl_read_size = SSL_read(ssl, buf, CHUNK_SIZE);
-        recv_msg += buf;
-    }
-
-    std::cout << recv_msg << std::endl;
-
-    SSL_shutdown(ssl);
-    SSL_free(ssl);
-    SSL_CTX_free(ctx);
-    close(s_conn);
-
-    return;
-
-    // SSL
-
 
     int recv_size = recv(s_conn, buf, CHUNK_SIZE, 0);
     recv_msg += buf;
@@ -130,7 +79,7 @@ void Network::processRequest(int s_conn)
     std::string full_path = "../../www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension();
 
-    Request request(s_conn, full_path);
+    Request request(s_conn, full_path, nullptr);
 
     std::ifstream f_data(full_path);
 
@@ -245,7 +194,12 @@ void Network::receive(std::any payload)
     close(request.getSocket());
 }
 
-bool Network::load()
+void Network::sslRequestCallback(std::string request)
+{
+    dynamic_cast<ISsl *>(core->getModule(ModuleType::SSL_MODULE))->sendReponse(request);
+}
+
+bool Network::load(std::any payload)
 {
     return true;
 }

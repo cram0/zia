@@ -68,7 +68,7 @@ void Core::registerModule(ModuleType type)
 
         *(void **)(&tmp) = dlsym(handle, "createPhpCgiModule");
     }
-    if (type == ModuleType::SSLmod) {
+    if (type == ModuleType::SSL_MODULE) {
         handle = dlopen("../modules/ssl/libssl.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
@@ -76,9 +76,9 @@ void Core::registerModule(ModuleType type)
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "createSSLModule");
-    }
+        *(void **)(&tmp) = dlsym(handle, "createSslModule");
 
+    }
     if ((error = dlerror()) != NULL)  {
             fprintf(stderr, "%s\n", error);
             exit(EXIT_FAILURE);
