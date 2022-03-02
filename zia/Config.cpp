@@ -9,7 +9,7 @@
 
 Config::Config()
 {
-
+    initBasicConfig();
 }
 
 Config::~Config()
@@ -34,4 +34,28 @@ const std::any Config::operator[](const char *key)
 bool Config::validKey(const char *key) const
 {
     return true;
+}
+
+void Config::initBasicConfig()
+{
+    std::ifstream ifs("../../config.json");
+
+    if (ifs.is_open()) {
+        json jf = json::parse(ifs);
+        std::cout << std::setw(4) << jf << "\n\n";
+        std::cout << "Config fileeeeeee" << std::endl;
+    } else {
+        std::cout << "Config file not found" << std::endl;
+    }
+
+}
+
+void Config::displayBasicConfig() const
+{
+    std::cout << _basicConfig << std::endl;
+}
+
+void Config::displayCurrentConfig() const
+{
+    std::cout << _config.dump(4) << std::endl;
 }

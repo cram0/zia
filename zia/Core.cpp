@@ -21,7 +21,7 @@ Core::~Core()
 
 void Core::loadConfig(std::string const &path)
 {
-
+    std::cout << "Loading config..." << std::endl;
 }
 
 void Core::listModules() const
@@ -29,10 +29,10 @@ void Core::listModules() const
 
 }
 
-// IConfig *Core::getConfig() const
-// {
-//     return;
-// }
+IConfig *Core::getConfig() const
+{
+    return (this->config);
+}
 
 IModule *Core::getModule(ModuleType type) const
 {

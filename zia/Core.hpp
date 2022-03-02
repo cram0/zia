@@ -14,13 +14,14 @@ class Core : public ICore {
     private:
         std::unordered_map<ModuleType, IModule *> modules;
         std::unordered_map<ModuleType, void *> modules_handles;
-        std::shared_ptr<IConfig> config;
+        IConfig* config;
     public:
+
         Core();
         ~Core();
         void loadConfig(std::string const &path);
         void listModules() const;
-        // IConfig *getConfig() const;
+        IConfig *getConfig() const;
         IModule *getModule(ModuleType type) const;
         void registerModule(ModuleType type);
         void unregisterModule(ModuleType type);
