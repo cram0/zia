@@ -21,7 +21,7 @@ open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect d
 
 ## Build Project
 
-### All OS
+- ### All OS
 ##### The following commands only need to be executed once when the project is cloned
 1. `git submodule update --init --recursive`
 2. `git submodule update --recursive --remote`
