@@ -22,7 +22,7 @@ class ICore;
 #    else
 #        define ZIA_API __declspec(dllimport)
 #    endif
-#elif
+#else
 #    define ZIA_API
 #endif
 

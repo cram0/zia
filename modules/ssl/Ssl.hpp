@@ -26,7 +26,7 @@
 #    else
 #        define ZIA_API __declspec(dllimport)
 #    endif
-#elif
+#else
 #    define ZIA_API
 #endif
 
@@ -51,9 +51,9 @@ class Ssl : public IModule, public ISsl {
         void sendReponse(std::string HttpsResponse);
 
     #if(_WIN32)
-        void Ssl::processRequest(SOCKET s_conn);
+        void processRequest(SOCKET s_conn);
      #else
-        void Ssl::processRequest(int s_conn);
+        void processRequest(int s_conn);
     #endif
 
         void receive(std::any payload, ModuleType sender);

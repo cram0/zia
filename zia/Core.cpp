@@ -6,6 +6,8 @@
 */
 
 #include "Core.hpp"
+#include <dlfcn.h>
+
 typedef IModule *(*IModuleDLL)();
 
 Core::Core()
@@ -45,9 +47,9 @@ void Core::registerModule(ModuleType type)
 {
     char *error = nullptr;
     IModuleDLL getIModuleDLL = nullptr;
-    HINSTANCE handle;
 
 #if(_WIN32)
+    HINSTANCE handle;
     if (type == ModuleType::NETWORK) {
         handle = LoadLibrary("bin/network.dll");
 
@@ -93,34 +95,34 @@ void Core::registerModule(ModuleType type)
 #else
     void *handle = nullptr;
     if (type == ModuleType::NETWORK) {
-        handle = dlopen("../modules/network/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "createNetworkModule");
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createNetworkModule");
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = dlopen("../modules/php/libphp.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "createPhpCgiModule");
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createPhpCgiModule");
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = dlopen("../modules/ssl/libssl.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "createSslModule");
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createSslModule");
 
     }
     if ((error = dlerror()) != NULL)  {
