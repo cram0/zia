@@ -11,6 +11,7 @@ const int CHUNK_SIZE = 4096;
 
 #include "Ssl.hpp"
 #include "Request.hpp"
+#include <limits>
 
 #include "sslutils.hpp"
 
@@ -75,7 +76,7 @@ void Ssl::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
 
-    if (request.getData().length() > MAXINT32) {
+    if (request.getData().length() > INT_MAX) {
         std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() <<")" << std::endl;
     }
     SSL_write(request.getSsl(), request.getData().c_str(), (int)request.getData().length());
@@ -158,7 +159,7 @@ void Ssl::processRequest(int s_conn)
         response << "Content-Length: " << 0;
         response << "\r\n\r\n";
 
-        if (request.getData().length() > MAXINT32) {
+        if (request.getData().length() > INT_MAX) {
             std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() <<")" << std::endl;
         }
         SSL_write(ssl, response.str().c_str(), response.str().length());
