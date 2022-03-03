@@ -13,9 +13,9 @@ IMPLEMENT : https://github.com/nlohmann/json#integration
 ## Conan
 - install [conan](https://conan.io/downloads.html)
 #### Windows
-open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) in `[setting]` block add `compiler.runtime=static`
+open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) in `[setting]` block add **`compiler.runtime=static`**
 #### Linux/Mac (Unix)
-open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) change **compiler.libcxx=libstdc** -> **compiler.libcxx=libstdc++11**
+open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) change **`compiler.libcxx=libstdc`** -> **`compiler.libcxx=libstdc++11`**
    
 ### Windows
 - install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
