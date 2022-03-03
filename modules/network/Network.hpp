@@ -26,7 +26,7 @@ class Network : public IModule {
         void init();
         const std::string getContentType(const std::string &file_extension);
         void sslRequestCallback(std::string request);
-        void receive(std::any payload);
+        void receive(std::any payload, ModuleType sender);
         bool load(std::any payload);
         bool unload();
         std::string getName() const;

@@ -42,7 +42,7 @@ void PhpCgi::setCore(ICore &coreRef)
     core = &coreRef;
 }
 
-void PhpCgi::receive(std::any payload)
+void PhpCgi::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
     std::string f_data;
@@ -64,9 +64,9 @@ void PhpCgi::receive(std::any payload)
     pclose(f);
     request.setData(f_data);
     if (request.getSsl() == nullptr)
-        getCore()->send(request, ModuleType::NETWORK);
+        getCore()->send(request, ModuleType::PHP_CGI, ModuleType::NETWORK);
     else
-        getCore()->send(request, ModuleType::SSL_MODULE);
+        getCore()->send(request, ModuleType::PHP_CGI, ModuleType::SSL_MODULE);
 }
 
 bool PhpCgi::load(std::any payload)

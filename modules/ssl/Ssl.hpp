@@ -36,7 +36,7 @@ class Ssl : public IModule, public ISsl {
 
         void processRequest(int s_conn);
 
-        void receive(std::any payload);
+        void receive(std::any payload, ModuleType sender);
         bool load(std::any payload);
         bool unload();
         std::string getName() const;

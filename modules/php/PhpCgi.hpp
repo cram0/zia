@@ -22,7 +22,7 @@ class PhpCgi : public IModule {
         ~PhpCgi();
         ICore *getCore() const;
         void setCore(ICore &coreRef);
-        void receive(std::any payload);
+        void receive(std::any payload, ModuleType sender);
         bool load(std::any payload);
         bool unload();
         std::string getName() const;

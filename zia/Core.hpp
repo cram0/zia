@@ -15,6 +15,8 @@ class Core : public ICore {
         std::unordered_map<ModuleType, IModule *> modules;
         std::unordered_map<ModuleType, void *> modules_handles;
         IConfig* config;
+        std::string homePath;
+        std::string phpString;
     public:
 
         Core();
@@ -26,7 +28,11 @@ class Core : public ICore {
         void registerModule(ModuleType type);
         void unregisterModule(ModuleType type);
         std::unordered_map<ModuleType, IModule *> getModules() const;
-        void send(std::any payload, ModuleType type);
+        void send(std::any payload, ModuleType type, ModuleType receiver);
+        std::string getHomePath() const;
+        void setHomePath(const std::string &path);
+        void setPhpString(const std::string &payload);
+        std::string getPhp() const;
 };
 
 #endif /* !CORE_HPP_ */

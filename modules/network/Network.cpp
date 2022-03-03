@@ -89,14 +89,14 @@ void Network::processRequest(int s_conn)
     if (f_data.is_open()) {
         std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
-            getCore()->send(request, ModuleType::PHP_CGI);
+            getCore()->send(request, ModuleType::NETWORK,  ModuleType::PHP_CGI);
             return;
         }
         else {
             std::stringstream data;
             data << f_data.rdbuf();
             request.setData(data.str());
-            receive(request);
+            receive(request, ModuleType::NETWORK);
             return;
         }
     }
@@ -184,7 +184,7 @@ void Network::setCore(ICore &coreRef)
     core = &coreRef;
 }
 
-void Network::receive(std::any payload)
+void Network::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
     std::string f_extension = std::filesystem::path(request.getFilePath()).extension();

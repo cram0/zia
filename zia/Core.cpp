@@ -108,11 +108,31 @@ std::unordered_map<ModuleType, IModule *> Core::getModules() const
     return modules;
 }
 
-void Core::send(std::any payload, ModuleType type)
+void Core::send(std::any payload, ModuleType sender, ModuleType receiver)
 {
-    if (modules.find(type) == modules.end()) {
-        std::cout << "Send failed : module of type "<< type <<" not in modules list" << std::endl;
+    if (modules.find(receiver) == modules.end()) {
+        std::cout << "Send failed : module of type "<< receiver <<" not in modules list" << std::endl;
         return;
     }
-    modules[type]->receive(payload);
+    modules[receiver]->receive(payload, sender);
+}
+
+std::string Core::getHomePath() const
+{
+    return homePath;
+}
+
+void Core::setHomePath(const std::string &path)
+{
+    homePath = path;
+}
+
+void Core::setPhpString(const std::string &payload)
+{
+    phpString = payload;
+}
+
+std::string Core::getPhp() const
+{
+    return phpString;
 }

@@ -63,7 +63,7 @@ void Ssl::sendReponse(std::string HttpsResponse)
 
 }
 
-void Ssl::receive(std::any payload)
+void Ssl::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
 
@@ -127,13 +127,13 @@ void Ssl::processRequest(int s_conn)
     if (f_data.is_open()) {
         std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
-            getCore()->send(request, ModuleType::PHP_CGI);
+            getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
         }
         else {
             std::stringstream data;
             data << f_data.rdbuf();
             request.setData(data.str());
-            receive(request);
+            receive(request, ModuleType::NETWORK);
         }
     }
     else {
