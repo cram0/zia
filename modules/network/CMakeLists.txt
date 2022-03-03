@@ -14,7 +14,7 @@ add_library(network SHARED
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 set_target_properties(network PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
-target_link_libraries(network ${CONAN_LIBS})
+target_link_libraries(network PUBLIC CONAN_PKG::openssl)
 # set_target_properties(network PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

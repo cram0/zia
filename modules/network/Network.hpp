@@ -8,6 +8,10 @@
 #ifndef NETWORK_HPP_
 #define NETWORK_HPP_
 
+#if(_WIN32)
+#include <WinSock2.h>
+#endif
+
 #include "IModule.hpp"
 
 class ICore;
@@ -31,8 +35,13 @@ class Network : public IModule {
         bool unload();
         std::string getName() const;
         ModuleType getType() const;
-        void run();
+
+    [[noreturn]] void run();
+#if(_WIN32)
+        void processRequest(SOCKET s_conn);
+#else
         void processRequest(int s_conn);
+#endif
 };
 
 static std::unordered_map<std::string, std::string> contentTypeMap = {
