@@ -10,12 +10,13 @@ To read a json from stream, we simply use `std::ifstream` and deserialize.
 IMPLEMENT : https://github.com/nlohmann/json#integration
 
 ## Dependencies
-### Necessary
+## Conan
 - install [conan](https://conan.io/downloads.html)
-#### Windows Only!
-open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`)
-   in `[setting]` block add `compiler.runtime=static`
-
+#### Windows
+open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) in `[setting]` block add `compiler.runtime=static`
+#### Linux/Mac (Unix)
+open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) change **compiler.libcxx=libstdc** -> **compiler.libcxx=libstdc++11**
+   
 ### Windows
 - install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
 
