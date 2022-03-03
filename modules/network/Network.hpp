@@ -16,7 +16,17 @@
 
 class ICore;
 
-class Network : public IModule {
+#ifdef _WIN32
+#    ifdef ZIA_EXPORTS
+#        define ZIA_API __declspec(dllexport)
+#    else
+#        define ZIA_API __declspec(dllimport)
+#    endif
+#elif
+#    define ZIA_API
+#endif
+
+class ZIA_API Network : public IModule {
     private:
         ICore *core;
         std::string name;
@@ -43,6 +53,8 @@ class Network : public IModule {
         void processRequest(int s_conn);
 #endif
 };
+
+extern "C" ZIA_API Network *createNetworkModule();
 
 static std::unordered_map<std::string, std::string> contentTypeMap = {
     {".aac", "audio/aac"},

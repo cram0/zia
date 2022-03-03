@@ -6,8 +6,6 @@
 */
 
 #include "Core.hpp"
-#include "Network.hpp"
-#include "Ssl.hpp"
 
 #include <thread>
 
@@ -26,14 +24,14 @@ int main(int ac, char **av)
     core.registerModule(ModuleType::PHP_CGI);
     core.registerModule(ModuleType::NETWORK);
     core.registerModule(ModuleType::SSL_MODULE);
-    Network *net = (Network *)core.getModule(ModuleType::NETWORK);
-    Ssl *ssl = (Ssl *)core.getModule(ModuleType::SSL_MODULE);
-
-    std::thread ssl_th(&Ssl::run, ssl);
-    ssl_th.detach();
-
-    std::thread net_th(&Network::run, net);
-    net_th.detach();
+//    Network *net = (Network *)core.getModule(ModuleType::NETWORK);
+//    Ssl *ssl = (Ssl *)core.getModule(ModuleType::SSL_MODULE);
+//
+//    std::thread ssl_th(&Ssl::run, ssl);
+//    ssl_th.detach();
+//
+//    std::thread net_th(&Network::run, net);
+//    net_th.detach();
 
     char c;
     std::cin >> c;

@@ -7,8 +7,9 @@
 */
 
 #define ZIA_EXPORTS
+const int CHUNK_SIZE = 4096;
+
 #include "Ssl.hpp"
-#include "Network.hpp"
 #include "Request.hpp"
 
 #include "sslutils.hpp"
@@ -277,6 +278,6 @@ ModuleType Ssl::getType() const
     return type;
 }
 
-extern "C" Ssl *createSslModule() {
+extern "C" ZIA_API Ssl *createSslModule() {
     return (new Ssl());
 }

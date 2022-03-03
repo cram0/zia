@@ -10,10 +10,21 @@
 #ifndef CORE_HPP_
 #define CORE_HPP_
 
+#if(_WIN32)
+#define _WINSOCKAPI_    // stops windows.h including winsock.h
+#include <Windows.h>
+#else
+#include <dlfcn.h>
+#endif
+
 class Core : public ICore {
     private:
         std::unordered_map<ModuleType, IModule *> modules;
+#if(_WIN32)
+        std::unordered_map<ModuleType, HINSTANCE> modules_handles;
+#else
         std::unordered_map<ModuleType, void *> modules_handles;
+#endif
         IConfig* config;
         std::string homePath;
         std::string phpString;

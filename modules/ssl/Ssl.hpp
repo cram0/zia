@@ -20,6 +20,16 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef _WIN32
+#    ifdef ZIA_EXPORTS
+#        define ZIA_API __declspec(dllexport)
+#    else
+#        define ZIA_API __declspec(dllimport)
+#    endif
+#elif
+#    define ZIA_API
+#endif
+
 class Ssl : public IModule, public ISsl {
     private:
         ICore *core{};
@@ -52,5 +62,7 @@ class Ssl : public IModule, public ISsl {
         std::string getName() const;
         ModuleType getType() const;
 };
+
+extern "C" ZIA_API Ssl *createSslModule();
 
 #endif /* !SSL_HPP_ */

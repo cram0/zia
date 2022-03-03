@@ -5,10 +5,6 @@
 ** Network
 */
 
-#include "Network.hpp"
-#include "Request.hpp"
-#include "ISsl.hpp"
-
 #define ZIA_EXPORTS
 #include "Network.hpp"
 #include "Request.hpp"
@@ -256,6 +252,6 @@ ModuleType Network::getType() const
     return type;
 }
 
-extern "C" Network *createNetworkModule() {
-    return (new Network());
+extern "C" ZIA_API Network *createNetworkModule() {
+    return new Network();
 }

@@ -12,9 +12,6 @@ add_executable(zia
     Config.cpp
 )
 
-target_link_libraries(zia PUBLIC network)
-target_link_libraries(zia PUBLIC ssl)
-
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../zia-api)
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/network)

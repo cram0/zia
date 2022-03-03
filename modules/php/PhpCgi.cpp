@@ -5,6 +5,7 @@
 ** PhpCgi
 */
 
+#define ZIA_EXPORTS
 #include "PhpCgi.hpp"
 #include "Request.hpp"
 
@@ -104,6 +105,6 @@ ModuleType PhpCgi::getType() const
     return type;
 }
 
-extern "C" PhpCgi *createPhpCgiModule() {
+extern "C" ZIA_API PhpCgi *createPhpCgiModule() {
     return (new PhpCgi());
 }
