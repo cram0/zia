@@ -101,6 +101,7 @@ void Core::unregisterModule(ModuleType type)
     dlclose(modules_handles[type]);
     modules.erase(type);
     modules_handles.erase(type);
+    std::cout << "Succesfully deleted module of type " << type << std::endl;
 }
 
 std::unordered_map<ModuleType, IModule *> Core::getModules() const

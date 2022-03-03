@@ -63,20 +63,35 @@ void Ssl::sendReponse(std::string HttpsResponse)
 
 }
 
+const std::string Ssl::getContentType(const std::string &file_extension)
+{
+    return (contentTypeMap[file_extension]);
+}
+
 void Ssl::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
 
-    SSL_write(request.getSsl(), request.getData().c_str(), request.getData().length());
+    std::string f_extension = std::filesystem::path(request.getFilePath()).extension();
+    std::ostringstream stream;
+
+    stream << "HTTP/1.1 200 OK\r\n";
+    stream << "Content-Length: " << request.getData().length() << "\r\n";
+    if (f_extension != ".php") {
+        stream << "Content-Type: "<< getContentType(f_extension);
+        stream << "\r\n\r\n";
+    }
+    stream << request.getData();
+
+    SSL_write(request.getSsl(), stream.str().c_str(), stream.str().length());
 }
 
 void Ssl::processRequest(int s_conn)
 {
-    SSL *ssl;
     SSL_CTX *ctx = ssl_utils::create_context();
     ssl_utils::configure_context(ctx);
+    SSL *ssl = SSL_new(ctx);
 
-    ssl = SSL_new(ctx);
     if (SSL_set_fd(ssl, s_conn) == 0) {
         perror("Unable to set fd to ssl object");
         ERR_print_errors_fp(stderr);
@@ -84,7 +99,7 @@ void Ssl::processRequest(int s_conn)
     }
 
     int ac_err = SSL_accept(ssl);
-    SSL_set_accept_state(ssl);
+    // SSL_set_accept_state(ssl);
 
     if (ac_err <= 0) {
         ssl_utils::SSL_print_error(ssl, ac_err);

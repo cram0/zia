@@ -72,11 +72,13 @@ void Network::processRequest(int s_conn)
 
     std::string request_method, request_file, request_version;
 
+    // Debug
     std::cout << recv_msg << std::endl;
 
     std::istringstream iss(recv_msg);
     iss >> request_method >> request_file >> request_version;
 
+    // Debug
     std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "../../www" + request_file;
