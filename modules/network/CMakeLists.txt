@@ -8,7 +8,6 @@ project(network VERSION 1.0)
 
 add_library(network SHARED
     Network.cpp
-    Request.cpp
 )
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
@@ -19,3 +18,4 @@ target_link_libraries(network ${CONAN_LIBS})
 
 target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia-api)
+target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia)

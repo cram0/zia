@@ -33,7 +33,6 @@ class Ssl : public IModule, public ISsl {
         void run();
         void setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback);
         void sendReponse(std::string HttpsResponse);
-        const std::string getContentType(const std::string &file_extension);
 
         void processRequest(int s_conn);
 

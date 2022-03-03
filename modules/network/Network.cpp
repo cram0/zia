@@ -51,11 +51,6 @@ void Network::init()
 
 }
 
-const std::string Network::getContentType(const std::string &file_extension)
-{
-    return (contentTypeMap[file_extension]);
-}
-
 void Network::processRequest(int s_conn)
 {
     std::string recv_msg;
@@ -73,13 +68,25 @@ void Network::processRequest(int s_conn)
     std::string request_method, request_file, request_version;
 
     // Debug
-    std::cout << recv_msg << std::endl;
+    // std::cout << recv_msg << std::endl;
 
     std::istringstream iss(recv_msg);
     iss >> request_method >> request_file >> request_version;
 
+    if (!isValidMethod(request_method)) {
+        std::cout << "Bad method : " << request_method << std::endl;
+        close(s_conn);
+        return;
+    }
+
+    if (!isValidHttpVersion(request_version)) {
+        std::cout << "Bad HTTP version : " << request_version << std::endl;
+        close(s_conn);
+        return;
+    }
+
     // Debug
-    std::cout << request_method << " " << request_file << " " << request_version << std::endl;
+    // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "../../www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension();
@@ -89,7 +96,8 @@ void Network::processRequest(int s_conn)
     std::ifstream f_data(full_path);
 
     if (f_data.is_open()) {
-        std::cout << "File exists" << std::endl;
+        // Debug
+        // std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
             getCore()->send(request, ModuleType::NETWORK,  ModuleType::PHP_CGI);
             return;
@@ -103,7 +111,8 @@ void Network::processRequest(int s_conn)
         }
     }
     else {
-        std::cout << "File doesn't exist" << std::endl;
+        // Debug
+        // std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
         response << "Content-Length: " << 0;

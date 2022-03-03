@@ -18,3 +18,4 @@ set_target_properties(php PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LI
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../network)
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia-api)
+target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia)

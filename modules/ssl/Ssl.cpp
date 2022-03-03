@@ -7,7 +7,6 @@
 */
 
 #include "Ssl.hpp"
-#include "Network.hpp"
 #include "Request.hpp"
 
 #include "sslutils.hpp"
@@ -63,11 +62,6 @@ void Ssl::sendReponse(std::string HttpsResponse)
 
 }
 
-const std::string Ssl::getContentType(const std::string &file_extension)
-{
-    return (contentTypeMap[file_extension]);
-}
-
 void Ssl::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
@@ -93,16 +87,29 @@ void Ssl::processRequest(int s_conn)
     SSL *ssl = SSL_new(ctx);
 
     if (SSL_set_fd(ssl, s_conn) == 0) {
-        perror("Unable to set fd to ssl object");
+        std::cout << "Unable to set fd to SSL object" << std::endl;
         ERR_print_errors_fp(stderr);
-        exit(EXIT_FAILURE);
+
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+        close(s_conn);
+
+        return;
     }
 
     int ac_err = SSL_accept(ssl);
-    // SSL_set_accept_state(ssl);
 
     if (ac_err <= 0) {
+        std::cout << "Unable to accept SSL object" << std::endl;
         ssl_utils::SSL_print_error(ssl, ac_err);
+
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+        close(s_conn);
+
+        return;
     }
 
     std::string recv_msg;
@@ -110,7 +117,14 @@ void Ssl::processRequest(int s_conn)
 
     int ssl_read_size = SSL_read(ssl, buf, CHUNK_SIZE);
 
-    ssl_utils::SSL_print_error(ssl, ssl_read_size);
+    if (ssl_read_size <= 0) {
+        ssl_utils::SSL_print_error(ssl, ssl_read_size);
+
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+        close(s_conn);
+    }
 
     recv_msg += buf;
 
@@ -121,13 +135,24 @@ void Ssl::processRequest(int s_conn)
     }
 
     std::string request_method, request_file, request_version;
-
-    // std::cout << recv_msg << std::endl;
-
     std::istringstream iss(recv_msg);
+
     iss >> request_method >> request_file >> request_version;
 
-    std::cout << request_method << " " << request_file << " " << request_version << std::endl;
+    if (!isValidMethod(request_method)) {
+        std::cout << "Bad method : " << request_method << std::endl;
+        close(s_conn);
+        return;
+    }
+
+    if (!isValidHttpVersion(request_version)) {
+        std::cout << "Bad HTTP version : " << request_version << std::endl;
+        close(s_conn);
+        return;
+    }
+
+    // Debug
+    // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "../../www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension();
@@ -136,11 +161,12 @@ void Ssl::processRequest(int s_conn)
 
     std::ifstream f_data(full_path);
 
-    // v fix this trash
-    std::cout << "File : " << full_path << std::endl;
+    // Debug
+    // std::cout << "File : " << full_path << std::endl;
 
     if (f_data.is_open()) {
-        std::cout << "File exists" << std::endl;
+        // Debug
+        // std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
             getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
         }
@@ -152,7 +178,8 @@ void Ssl::processRequest(int s_conn)
         }
     }
     else {
-        std::cout << "File doesn't exist" << std::endl;
+        // Debug
+        // std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
         response << "Content-Length: " << 0;

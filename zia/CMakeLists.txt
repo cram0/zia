@@ -10,6 +10,7 @@ add_executable(zia
     main.cpp
     Core.cpp
     Config.cpp
+    Request.cpp
 )
 
 target_link_libraries(zia PUBLIC network)
