@@ -7,14 +7,29 @@
 
 #include "Config.hpp"
 
+#include <fstream>
+
 Config::Config()
 {
-    initBasicConfig();
+    std::cout << "Config created" << std::endl;
 }
 
 Config::~Config()
 {
 
+}
+
+void Config::loadConfig(const std::string &path)
+{
+    std::ifstream ifs(path);
+
+    if (ifs.is_open()) {
+        ifs >> m_config;
+        std::cout << m_config.dump(4) << std::endl;
+    }
+    else {
+        std::cout << "Config file not found" << std::endl;
+    }
 }
 
 // Lire les modules du fichier config, generer un vector et le renvoyer
@@ -34,28 +49,4 @@ const std::any Config::operator[](const char *key)
 bool Config::validKey(const char *key) const
 {
     return true;
-}
-
-void Config::initBasicConfig()
-{
-    std::ifstream ifs("../../config.json");
-
-    if (ifs.is_open()) {
-        json jf = json::parse(ifs);
-        std::cout << std::setw(4) << jf << "\n\n";
-        std::cout << "Config fileeeeeee" << std::endl;
-    } else {
-        std::cout << "Config file not found" << std::endl;
-    }
-
-}
-
-void Config::displayBasicConfig() const
-{
-    std::cout << _basicConfig << std::endl;
-}
-
-void Config::displayCurrentConfig() const
-{
-    std::cout << _config.dump(4) << std::endl;
 }

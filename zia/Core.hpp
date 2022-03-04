@@ -10,11 +10,12 @@
 #ifndef CORE_HPP_
 #define CORE_HPP_
 
-class Core : public ICore {
+class Core : public ICore
+{
     private:
         std::unordered_map<ModuleType, IModule *> modules;
         std::unordered_map<ModuleType, void *> modules_handles;
-        IConfig* config;
+        IConfig *config = nullptr;
         std::string homePath;
         std::string phpString;
     public:

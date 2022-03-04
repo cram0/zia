@@ -6,22 +6,30 @@
 */
 
 #include "Core.hpp"
+#include "Config.hpp"
 
 #include <dlfcn.h>
 
 Core::Core()
 {
     std::cout << "Core created" << std::endl;
+
+    if (config == nullptr) {
+        config = new Config;
+    }
 }
 
 Core::~Core()
 {
-
+    if (config != nullptr) {
+        delete config;
+    }
 }
 
 void Core::loadConfig(std::string const &path)
 {
-    std::cout << "Loading config..." << std::endl;
+    Config *config = (Config *)getConfig();
+    config->loadConfig(path);
 }
 
 void Core::listModules() const
