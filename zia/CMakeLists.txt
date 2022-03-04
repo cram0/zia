@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 set(CMAKE_CXX_STANDARD 17)
 if (UNIX)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -lpthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(zia VERSION 1.0)
@@ -12,9 +12,10 @@ add_executable(zia
     Config.cpp
     Request.cpp
 )
-
-target_link_libraries(zia PUBLIC network)
-target_link_libraries(zia PUBLIC ssl)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(zia PRIVATE Threads::Threads)
+target_link_libraries(zia PRIVATE ${CMAKE_DL_LIBS})
 
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../zia-api)

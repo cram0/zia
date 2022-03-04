@@ -5,18 +5,23 @@
 ** PhpCgi
 */
 
+#define ZIA_EXPORTS
 #include "PhpCgi.hpp"
 #include "Request.hpp"
 
+#if(_WIN32)
+#include <io.h>
+#else
 #include <unistd.h>
-#include <stdio.h>
+#endif
+
+#include <cstdio>
 #include <fcntl.h>
-#include <string.h>
+#include <cstring>
 
 #include <sstream>
 
-PhpCgi::PhpCgi()
-{
+PhpCgi::PhpCgi() {
     type = ModuleType::PHP_CGI;
     name = "PhpCgiName";
     std::cout << "PhpCgi created" << std::endl;
@@ -51,7 +56,13 @@ void PhpCgi::receive(std::any payload, ModuleType sender)
     char buf[CHUNK_SIZE] = {0};
 
     FILE *f;
+
+#if(_WIN32)
+    f = _popen(std::string("php-cgi " + request.getFilePath()).c_str(), "r");
+#else
     f = popen(std::string("php-cgi " + request.getFilePath()).c_str(), "r");
+#endif
+
     pread_size = fread(buf, 1, CHUNK_SIZE, f);
     f_data += buf;
 
@@ -61,7 +72,12 @@ void PhpCgi::receive(std::any payload, ModuleType sender)
         f_data += buf;
     }
 
+#if(_WIN32)
+    _pclose(f);
+#else
     pclose(f);
+#endif
+
     request.setData(f_data);
     if (request.getSsl() == nullptr)
         getCore()->send(request, ModuleType::PHP_CGI, ModuleType::NETWORK);
@@ -89,6 +105,6 @@ ModuleType PhpCgi::getType() const
     return type;
 }
 
-extern "C" PhpCgi *createPhpCgiModule() {
+extern "C" ZIA_API PhpCgi *createPhpCgiModule() {
     return (new PhpCgi());
 }

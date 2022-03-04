@@ -8,7 +8,7 @@
 #include "Core.hpp"
 #include "Config.hpp"
 
-#include <dlfcn.h>
+typedef IModule *(*IModuleDLL)();
 
 Core::Core()
 {
@@ -53,46 +53,92 @@ IModule *Core::getModule(ModuleType type) const
 void Core::registerModule(ModuleType type)
 {
     char *error = nullptr;
-    IModule *(*tmp)() = nullptr;
-    void *handle = nullptr;
+    IModuleDLL getIModuleDLL = nullptr;
 
+#if(_WIN32)
+    HINSTANCE handle;
     if (type == ModuleType::NETWORK) {
-        handle = dlopen("../modules/network/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = LoadLibrary("bin/network.dll");
 
-        if (!handle) {
-            fprintf(stderr, "%s\n", dlerror());
+        if (handle == nullptr) {
+            std::cout << "unable to load: " << "bin/network.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
-
-        *(void **)(&tmp) = dlsym(handle, "createNetworkModule");
+        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createNetworkModule");
+        if (getIModuleDLL == nullptr) {
+            std::cout << "cant get func 'createNetworkModule'" << std::endl;
+            FreeLibrary(handle);
+            exit(EXIT_FAILURE);
+        }
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = dlopen("../modules/php/libphp.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = LoadLibrary("bin/php.dll");
 
-        if (!handle) {
-            fprintf(stderr, "%s\n", dlerror());
+        if (handle == nullptr) {
+            std::cout << "unable to load: " << "bin/php.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
-
-        *(void **)(&tmp) = dlsym(handle, "createPhpCgiModule");
+        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createPhpCgiModule");
+        if (getIModuleDLL == nullptr) {
+            std::cout << "cant get func 'createPhpCgiModule'" << std::endl;
+            FreeLibrary(handle);
+            exit(EXIT_FAILURE);
+        }
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = dlopen("../modules/ssl/libssl.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = LoadLibrary("bin/ssl.dll");
+
+        if (handle == nullptr) {
+            std::cout << "unable to load: " << "bin/ssl.dll" << " lib" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createSslModule");
+        if (getIModuleDLL == nullptr) {
+            std::cout << "cant get func 'createSslModule'" << std::endl;
+            FreeLibrary(handle);
+            exit(EXIT_FAILURE);
+        }
+    }
+#else
+    void *handle = nullptr;
+    if (type == ModuleType::NETWORK) {
+        handle = dlopen("lib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
             exit(EXIT_FAILURE);
         }
 
-        *(void **)(&tmp) = dlsym(handle, "createSslModule");
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createNetworkModule");
+    }
+    if (type == ModuleType::PHP_CGI) {
+        handle = dlopen("lib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
+
+        if (!handle) {
+            fprintf(stderr, "%s\n", dlerror());
+            exit(EXIT_FAILURE);
+        }
+
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createPhpCgiModule");
+    }
+    if (type == ModuleType::SSL_MODULE) {
+        handle = dlopen("lib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
+
+        if (!handle) {
+            fprintf(stderr, "%s\n", dlerror());
+            exit(EXIT_FAILURE);
+        }
+
+       getIModuleDLL = (IModuleDLL)dlsym(handle, "createSslModule");
 
     }
     if ((error = dlerror()) != NULL)  {
             fprintf(stderr, "%s\n", error);
             exit(EXIT_FAILURE);
     }
+#endif
 
-    IModule *pp = (*tmp)();
+    IModule *pp = getIModuleDLL();
     pp->setCore(*this);
 
     modules.emplace(std::make_pair(type, pp));
@@ -106,7 +152,11 @@ void Core::unregisterModule(ModuleType type)
         return;
     }
     delete modules[type];
-    dlclose(modules_handles[type]);
+    #if(_WIN32)
+        FreeLibrary(modules_handles[type]);
+    #else
+        dlclose(modules_handles[type]);
+    #endif
     modules.erase(type);
     modules_handles.erase(type);
     std::cout << "Succesfully deleted module of type " << type << std::endl;

@@ -5,20 +5,21 @@
 ** Network
 */
 
+#define ZIA_EXPORTS
 #include "Network.hpp"
 #include "Request.hpp"
 #include "ISsl.hpp"
 
-#include <sys/socket.h>
-
-// Remplacer ces librairies pour la structure sockaddr_in
+#if(_WIN32)
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <io.h>
+#else
+#include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
-#include <unistd.h>
-#include <fstream>
-#include <sstream>
-#include <ostream>
 #include <istream>
 #include <string>
 #include <cstring>
@@ -27,6 +28,7 @@
 #include <fcntl.h>
 #include <iomanip>
 #include <thread>
+#include <sstream>
 
 Network::Network()
 {
@@ -51,7 +53,11 @@ void Network::init()
 
 }
 
+#if(_WIN32)
+void Network::processRequest(SOCKET s_conn)
+#else
 void Network::processRequest(int s_conn)
+#endif
 {
     std::string recv_msg;
     char buf[CHUNK_SIZE] = {0};
@@ -89,7 +95,7 @@ void Network::processRequest(int s_conn)
     // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "../../www" + request_file;
-    std::string file_extension = std::filesystem::path(full_path).extension();
+    std::string file_extension = std::filesystem::path(full_path).extension().string();
 
     Request request(s_conn, full_path, nullptr);
 
@@ -118,13 +124,20 @@ void Network::processRequest(int s_conn)
         response << "Content-Length: " << 0;
         response << "\r\n\r\n";
 
+#if(_WIN32)
+        if (response.str().length() > MAXINT32)
+            throw;
+        send(s_conn, response.str().c_str(), (int)response.str().length(), 0);
+        _close((int)s_conn);
+#else
         send(s_conn, response.str().c_str(), response.str().length(), 0);
         close(s_conn);
+#endif
         return;
     }
 }
 
-void Network::run()
+[[noreturn]] void Network::run()
 {
     // Seulement pour Linux
     sockaddr_in server;
@@ -136,9 +149,15 @@ void Network::run()
     // Il faut trouver un équivalent pour htons() et htonl()
 
     int CHUNK_SIZE = 4096;
+#if(_WIN32)
+    SOCKET s_conn = -1;
+   const char enable = 1;
+#else
     int s_conn = -1;
     int enable = 1;
-    int s_listen = socket(AF_INET, SOCK_STREAM, 0);
+#endif
+
+    auto s_listen = socket(AF_INET, SOCK_STREAM, 0);
 
     // Supprimer en production //
     if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
@@ -146,7 +165,7 @@ void Network::run()
         exit(1);
     }
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+    if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
         std::cerr << "setsockopt(SO_REUSEPORT) failed" << std::endl;
         exit(1);
     }
@@ -198,7 +217,7 @@ void Network::setCore(ICore &coreRef)
 void Network::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
-    std::string f_extension = std::filesystem::path(request.getFilePath()).extension();
+    std::string f_extension = std::filesystem::path(request.getFilePath()).extension().string();
     std::ostringstream stream;
 
     stream << "HTTP/1.1 200 OK\r\n";
@@ -209,9 +228,14 @@ void Network::receive(std::any payload, ModuleType sender)
     }
     stream << request.getData();
 
+#if(_WIN32)
+    if (stream.str().length() > MAXINT32) throw;
+    send(request.getSocket(), stream.str().c_str(), (int)stream.str().length(), 0);
+    _close((int)request.getSocket());
+#else
     send(request.getSocket(), stream.str().c_str(), stream.str().length(), 0);
-
     close(request.getSocket());
+#endif
 }
 
 void Network::sslRequestCallback(std::string request)
@@ -239,6 +263,6 @@ ModuleType Network::getType() const
     return type;
 }
 
-extern "C" Network *createNetworkModule() {
-    return (new Network());
+extern "C" ZIA_API Network *createNetworkModule() {
+    return new Network();
 }

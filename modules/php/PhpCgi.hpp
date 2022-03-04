@@ -10,7 +10,17 @@
 
 #include "IModule.hpp"
 
-class PhpCgi : public IModule {
+#ifdef _WIN32
+#    ifdef ZIA_EXPORTS
+#        define ZIA_API __declspec(dllexport)
+#    else
+#        define ZIA_API __declspec(dllimport)
+#    endif
+#else
+#    define ZIA_API
+#endif
+
+class ZIA_API PhpCgi : public IModule {
     private:
         ICore *core;
         std::string name;
@@ -28,5 +38,6 @@ class PhpCgi : public IModule {
         std::string getName() const;
         ModuleType getType() const;
 };
+extern "C" ZIA_API PhpCgi *createPhpCgiModule();
 
 #endif /* !PHPCGI_HPP_ */

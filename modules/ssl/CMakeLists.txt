@@ -8,7 +8,9 @@ project(ssl VERSION 1.0)
 
 add_library(ssl SHARED
     Ssl.cpp
+    ../network/Request.cpp
 )
+target_link_libraries(ssl PUBLIC CONAN_PKG::openssl)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
