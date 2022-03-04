@@ -7,8 +7,7 @@
 
 #include "ICore.hpp"
 
-#ifndef CORE_HPP_
-#define CORE_HPP_
+#pragma once
 
 #if(_WIN32)
 #define _WINSOCKAPI_    // stops windows.h including winsock.h
@@ -24,6 +23,7 @@ class Core : public ICore {
         std::unordered_map<ModuleType, HINSTANCE> modules_handles;
 #else
         std::unordered_map<ModuleType, void *> modules_handles;
+#endif
         IConfig *config = nullptr;
         std::string homePath;
         std::string phpString;
@@ -44,5 +44,3 @@ class Core : public ICore {
         void setPhpString(const std::string &payload);
         std::string getPhp() const;
 };
-
-#endif /* !CORE_HPP_ */

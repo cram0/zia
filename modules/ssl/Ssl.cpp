@@ -7,7 +7,6 @@
 */
 
 #define ZIA_EXPORTS
-const int CHUNK_SIZE = 4096;
 
 #include "Ssl.hpp"
 #include "Request.hpp"
@@ -32,6 +31,7 @@ const int CHUNK_SIZE = 4096;
 #include <string>
 #include <cstring>
 #include <filesystem>
+#include <thread>
 
 Ssl::Ssl()
 {
@@ -45,6 +45,8 @@ Ssl::Ssl()
 Ssl::Ssl(ICore &coreRef) : Ssl()
 {
     core = &coreRef;
+    std::thread th(&Ssl::run, *this);
+    th.detach();
 }
 
 Ssl::~Ssl()
@@ -322,6 +324,6 @@ ModuleType Ssl::getType() const
     return type;
 }
 
-extern "C" ZIA_API Ssl *createSslModule() {
-    return (new Ssl());
+extern "C" ZIA_API Ssl *createSslModule(ICore &coreRef) {
+    return (new Ssl(coreRef));
 }

@@ -8,7 +8,7 @@
 #include "Core.hpp"
 #include "Config.hpp"
 
-typedef IModule *(*IModuleDLL)();
+typedef IModule *(*IModuleDLL)(ICore &coreRef);
 
 Core::Core()
 {
@@ -102,7 +102,7 @@ void Core::registerModule(ModuleType type)
 #else
     void *handle = nullptr;
     if (type == ModuleType::NETWORK) {
-        handle = dlopen("lib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("../lib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
@@ -112,7 +112,7 @@ void Core::registerModule(ModuleType type)
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createNetworkModule");
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = dlopen("lib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("../lib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
@@ -122,7 +122,7 @@ void Core::registerModule(ModuleType type)
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createPhpCgiModule");
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = dlopen("lib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("../lib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
@@ -138,8 +138,7 @@ void Core::registerModule(ModuleType type)
     }
 #endif
 
-    IModule *pp = getIModuleDLL();
-    pp->setCore(*this);
+    IModule *pp = getIModuleDLL(*this);
 
     modules.emplace(std::make_pair(type, pp));
     modules_handles.emplace(std::make_pair(type, handle));

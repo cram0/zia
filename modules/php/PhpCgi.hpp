@@ -38,6 +38,7 @@ class ZIA_API PhpCgi : public IModule {
         std::string getName() const;
         ModuleType getType() const;
 };
-extern "C" ZIA_API PhpCgi *createPhpCgiModule();
+
+extern "C" ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef);
 
 #endif /* !PHPCGI_HPP_ */

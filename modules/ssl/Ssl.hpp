@@ -63,6 +63,6 @@ class Ssl : public IModule, public ISsl {
         ModuleType getType() const;
 };
 
-extern "C" ZIA_API Ssl *createSslModule();
+extern "C" ZIA_API Ssl *createSslModule(ICore &coreRef);
 
 #endif /* !SSL_HPP_ */

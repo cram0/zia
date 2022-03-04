@@ -8,7 +8,7 @@ project(ssl VERSION 1.0)
 
 add_library(ssl SHARED
     Ssl.cpp
-    ../network/Request.cpp
+    ../../zia/Request.cpp
 )
 target_link_libraries(ssl PUBLIC CONAN_PKG::openssl)
 

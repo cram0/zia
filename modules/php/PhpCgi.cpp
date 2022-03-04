@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <fcntl.h>
 #include <cstring>
-
 #include <sstream>
 
 PhpCgi::PhpCgi() {
@@ -105,6 +104,6 @@ ModuleType PhpCgi::getType() const
     return type;
 }
 
-extern "C" ZIA_API PhpCgi *createPhpCgiModule() {
-    return (new PhpCgi());
+extern "C" ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef) {
+    return (new PhpCgi(coreRef));
 }

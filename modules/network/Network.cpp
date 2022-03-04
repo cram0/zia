@@ -41,6 +41,8 @@ Network::Network()
 Network::Network(ICore &coreRef) : Network()
 {
     core = &coreRef;
+    std::thread th(&Network::run, *this);
+    th.detach();
 }
 
 Network::~Network()
@@ -103,7 +105,7 @@ void Network::processRequest(int s_conn)
 
     if (f_data.is_open()) {
         // Debug
-        // std::cout << "File exists" << std::endl;
+        std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
             getCore()->send(request, ModuleType::NETWORK,  ModuleType::PHP_CGI);
             return;
@@ -118,7 +120,7 @@ void Network::processRequest(int s_conn)
     }
     else {
         // Debug
-        // std::cout << "File doesn't exist" << std::endl;
+        std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
         response << "Content-Length: " << 0;
@@ -263,6 +265,6 @@ ModuleType Network::getType() const
     return type;
 }
 
-extern "C" ZIA_API Network *createNetworkModule() {
-    return new Network();
+extern "C" ZIA_API Network *createNetworkModule(ICore &coreRef) {
+    return new Network(coreRef);
 }

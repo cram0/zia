@@ -8,7 +8,7 @@ project(php VERSION 1.0)
 
 add_library(php SHARED
     PhpCgi.cpp
-    ../network/Request.cpp
+    ../../zia/Request.cpp
 )
 target_link_libraries(php PUBLIC CONAN_PKG::openssl)
 
