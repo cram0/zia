@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 3.11)
-set(CMAKE_CXX_STANDARD 17)
-if (UNIX)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-endif()
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-project(zia VERSION 1.0)
 
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG    ${PROJECT_SOURCE_DIR})
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  ${PROJECT_SOURCE_DIR})
 add_executable(zia
     main.cpp
     Core.cpp

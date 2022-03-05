@@ -58,7 +58,7 @@ void Core::registerModule(ModuleType type)
 #if(_WIN32)
     HINSTANCE handle;
     if (type == ModuleType::NETWORK) {
-        handle = LoadLibrary("network.dll");
+        handle = LoadLibrary("lib/network.dll");
 
         if (handle == nullptr) {
             std::cout << "unable to load: " << "network.dll" << " lib" << std::endl;
@@ -72,7 +72,7 @@ void Core::registerModule(ModuleType type)
         }
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = LoadLibrary("php.dll");
+        handle = LoadLibrary("lib/php.dll");
 
         if (handle == nullptr) {
             std::cout << "unable to load: " << "php.dll" << " lib" << std::endl;
@@ -86,7 +86,7 @@ void Core::registerModule(ModuleType type)
         }
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = LoadLibrary("ssl.dll");
+        handle = LoadLibrary("lib/ssl.dll");
 
         if (handle == nullptr) {
             std::cout << "unable to load: " << "ssl.dll" << " lib" << std::endl;
@@ -102,7 +102,7 @@ void Core::registerModule(ModuleType type)
 #else
     void *handle = nullptr;
     if (type == ModuleType::NETWORK) {
-        handle = dlopen("UnixLib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libnetwork.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
@@ -112,7 +112,7 @@ void Core::registerModule(ModuleType type)
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createNetworkModule");
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = dlopen("UnixLib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libphp.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
@@ -122,7 +122,7 @@ void Core::registerModule(ModuleType type)
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createPhpCgiModule");
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = dlopen("UnixLib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
+        handle = dlopen("lib/libssl.so", RTLD_LAZY | RTLD_LOCAL);
 
         if (!handle) {
             fprintf(stderr, "%s\n", dlerror());
