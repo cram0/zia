@@ -1,4 +1,6 @@
 *build*/
+UnixLib
+zia
 *.o
 .vscode/
 www/*.png
