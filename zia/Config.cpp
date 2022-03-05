@@ -26,6 +26,7 @@ void Config::loadConfig(const std::string &path)
     if (ifs.is_open()) {
         ifs >> m_config;
         std::cout << m_config.dump(4) << std::endl;
+        ifs.close();
     }
     else {
         std::cout << "Config file not found" << std::endl;
