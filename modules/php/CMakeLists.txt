@@ -8,7 +8,7 @@ project(php VERSION 1.0)
 
 add_library(php SHARED
     PhpCgi.cpp
-    ../../zia/Request.cpp
+    ../../Zia/Request.cpp
 )
 target_link_libraries(php PUBLIC CONAN_PKG::openssl)
 
@@ -20,4 +20,4 @@ set_target_properties(php PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LI
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../network)
 target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia-api)
-target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia)
+target_include_directories(php PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../Zia)

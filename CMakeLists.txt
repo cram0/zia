@@ -5,7 +5,7 @@ if (UNIX)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(zia VERSION 1.0)
+project(Zia VERSION 1.0)
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
@@ -21,7 +21,14 @@ conan_cmake_install(PATH_OR_REFERENCE ..
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-add_subdirectory(zia)
+if(UNIX)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/UnixLib)
+else()
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/WindLib)
+endif()
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_subdirectory(modules/network)
 add_subdirectory(modules/php)
 add_subdirectory(modules/ssl)
+add_subdirectory(Zia)
