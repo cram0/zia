@@ -78,7 +78,7 @@ void Ssl::receive(std::any payload, ModuleType sender)
 {
     Request request = std::any_cast<Request>(payload);
 
-    std::string f_extension = std::filesystem::path(request.getFilePath()).extension();
+    std::string f_extension = std::filesystem::path(request.getFilePath()).extension().string();
     std::ostringstream stream;
 
     stream << "HTTP/1.1 200 OK\r\n";

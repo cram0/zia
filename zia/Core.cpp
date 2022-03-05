@@ -58,10 +58,10 @@ void Core::registerModule(ModuleType type)
 #if(_WIN32)
     HINSTANCE handle;
     if (type == ModuleType::NETWORK) {
-        handle = LoadLibrary("bin/network.dll");
+        handle = LoadLibrary("network.dll");
 
         if (handle == nullptr) {
-            std::cout << "unable to load: " << "bin/network.dll" << " lib" << std::endl;
+            std::cout << "unable to load: " << "network.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
         getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createNetworkModule");
@@ -72,10 +72,10 @@ void Core::registerModule(ModuleType type)
         }
     }
     if (type == ModuleType::PHP_CGI) {
-        handle = LoadLibrary("bin/php.dll");
+        handle = LoadLibrary("php.dll");
 
         if (handle == nullptr) {
-            std::cout << "unable to load: " << "bin/php.dll" << " lib" << std::endl;
+            std::cout << "unable to load: " << "php.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
         getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createPhpCgiModule");
@@ -86,10 +86,10 @@ void Core::registerModule(ModuleType type)
         }
     }
     if (type == ModuleType::SSL_MODULE) {
-        handle = LoadLibrary("bin/ssl.dll");
+        handle = LoadLibrary("ssl.dll");
 
         if (handle == nullptr) {
-            std::cout << "unable to load: " << "bin/ssl.dll" << " lib" << std::endl;
+            std::cout << "unable to load: " << "ssl.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
         getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createSslModule");

@@ -13,6 +13,7 @@
 #if(_WIN32)
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
 #include <io.h>
 #else
 #include <unistd.h>
@@ -25,9 +26,6 @@
 #include <cstring>
 #include <thread>
 #include <filesystem>
-#include <fcntl.h>
-#include <iomanip>
-#include <thread>
 #include <sstream>
 
 Network::Network()
@@ -48,6 +46,9 @@ Network::Network(ICore &coreRef) : Network()
 Network::~Network()
 {
     std::cout << "Network destroyed" << std::endl;
+#if(_WIN32)
+    WSACleanup();
+#endif
 }
 
 void Network::init()
@@ -83,13 +84,21 @@ void Network::processRequest(int s_conn)
 
     if (!isValidMethod(request_method)) {
         std::cout << "Bad method : " << request_method << std::endl;
+#if(_WIN32)
+        closesocket(s_conn);
+#else
         close(s_conn);
+#endif
         return;
     }
 
     if (!isValidHttpVersion(request_version)) {
         std::cout << "Bad HTTP version : " << request_version << std::endl;
+#if(_WIN32)
+        closesocket(s_conn);
+#else
         close(s_conn);
+#endif
         return;
     }
 
@@ -130,7 +139,7 @@ void Network::processRequest(int s_conn)
         if (response.str().length() > MAXINT32)
             throw;
         send(s_conn, response.str().c_str(), (int)response.str().length(), 0);
-        _close((int)s_conn);
+        closesocket(s_conn);
 #else
         send(s_conn, response.str().c_str(), response.str().length(), 0);
         close(s_conn);
@@ -141,38 +150,60 @@ void Network::processRequest(int s_conn)
 
 [[noreturn]] void Network::run()
 {
-    // Seulement pour Linux
-    sockaddr_in server;
-    server.sin_family = AF_INET;
-    server.sin_port = htons(11111);
-    server.sin_addr.s_addr = htonl(INADDR_ANY);
-    //
-    // Il faut trouver un équivalent pour sockaddr_in
-    // Il faut trouver un équivalent pour htons() et htonl()
-
-    int CHUNK_SIZE = 4096;
 #if(_WIN32)
-    SOCKET s_conn = -1;
+    //----------------------
+    // Initialize Windsock.
+    WSADATA wsaData;
+    int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (iResult != NO_ERROR) {
+        wprintf(L"WSAStartup failed with error: %ld\n", iResult);
+        exit(1);
+    }
+    SOCKET s_conn;
    const char enable = 1;
 #else
     int s_conn = -1;
     int enable = 1;
 #endif
 
-    auto s_listen = socket(AF_INET, SOCK_STREAM, 0);
+    sockaddr_in server{};
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_port = htons(11111);
+
+    auto s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 
     // Supprimer en production //
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
-        std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+//    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+//        std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
+//        exit(1);
+//    }
+//
+//    if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
+//        std::cerr << "network setsockopt(SO_BROADCAST) failed" << std::endl;
+//        exit(1);
+//    }
+
+#if(_WIN32)
+    if (s_listen == INVALID_SOCKET) {
+        wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
+        WSACleanup();
+        exit(1);
+    }
+    if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
+        wprintf(L"bind failed with error: %ld\n", WSAGetLastError());
+        closesocket(s_listen);
+        WSACleanup();
         exit(1);
     }
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
-        std::cerr << "setsockopt(SO_REUSEPORT) failed" << std::endl;
+    if (listen(s_listen, 10) == SOCKET_ERROR) {
+        wprintf(L"listen failed with error: %ld\n", WSAGetLastError());
+        closesocket(s_listen);
+        WSACleanup();
         exit(1);
     }
-    // Supprimer en production //
-
+#else
     if (s_listen == -1) {
         std::cerr << "Socket creation error" << std::endl;
         exit(1);
@@ -187,19 +218,27 @@ void Network::processRequest(int s_conn)
         std::cerr << "Socket listening error" << std::endl;
         exit(1);
     }
+#endif
 
-    while(42) {
-        // Seulement sur Linux
+    while(true) {
         sockaddr_in conn_addr = {0};
-        //
-        socklen_t conn_addr_len = {0};
+        socklen_t sizeof_addr = sizeof(conn_addr);
 
         std::cout << "Awaiting connections ..." << std::endl;
-        s_conn = accept(s_listen, (sockaddr *)&conn_addr, &conn_addr_len);
+        s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
 
+#if(_WIN32)
+        if (s_conn == INVALID_SOCKET) {
+            wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
+            closesocket(s_listen);
+            WSACleanup();
+            exit(1);
+        }
+#else
         if (s_conn == -1) {
             std::cerr << "Accept error" << std::endl;
         }
+#endif
 
         std::thread request(&Network::processRequest, this, s_conn);
         request.detach();
@@ -233,7 +272,7 @@ void Network::receive(std::any payload, ModuleType sender)
 #if(_WIN32)
     if (stream.str().length() > MAXINT32) throw;
     send(request.getSocket(), stream.str().c_str(), (int)stream.str().length(), 0);
-    _close((int)request.getSocket());
+    closesocket(request.getSocket());
 #else
     send(request.getSocket(), stream.str().c_str(), stream.str().length(), 0);
     close(request.getSocket());

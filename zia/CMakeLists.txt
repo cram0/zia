@@ -10,8 +10,8 @@ add_executable(zia
     main.cpp
     Core.cpp
     Config.cpp
-    Request.cpp
 )
+
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(zia PRIVATE Threads::Threads)
