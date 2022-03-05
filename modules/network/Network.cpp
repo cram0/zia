@@ -34,6 +34,7 @@ Network::Network()
     name = "NetworkName";
     std::cout << "Network created" << std::endl;
     core = nullptr;
+    running = true;
 }
 
 Network::Network(ICore &coreRef) : Network()
@@ -144,11 +145,10 @@ void Network::processRequest(int s_conn)
         send(s_conn, response.str().c_str(), response.str().length(), 0);
         close(s_conn);
 #endif
-        return;
     }
 }
 
-[[noreturn]] void Network::run()
+void Network::run()
 {
 #if(_WIN32)
     //----------------------
@@ -170,6 +170,8 @@ void Network::processRequest(int s_conn)
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_port = htons(11111);
+
+    // Put config here
 
     auto s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 
@@ -220,7 +222,7 @@ void Network::processRequest(int s_conn)
     }
 #endif
 
-    while(true) {
+    while(running) {
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
@@ -243,6 +245,13 @@ void Network::processRequest(int s_conn)
         std::thread request(&Network::processRequest, this, s_conn);
         request.detach();
     }
+
+#if(_WIN32)
+        closesocket(s_listen);
+#else
+        close(s_listen);
+#endif
+
 }
 
 ICore *Network::getCore() const
@@ -291,6 +300,7 @@ bool Network::load(std::any payload)
 
 bool Network::unload()
 {
+    running = false;
     return true;
 }
 

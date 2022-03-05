@@ -1,15 +1,13 @@
 {
-    "modules": {
-        "Network" : {
-            "ip" : "localhost",
-            "port" : "11111",
-            "root" : "www"
-        },
-        "PhpCgi" : {
-            "binary" : "php-cgi"
-        },
-        "SSL" : {
-            "xxx" : "xxx"
-        }
+    "Network" : {
+        "ip" : "127.0.0.1",
+        "port" : "11111"
+    },
+    "PhpCgi" : {
+        "binary" : "php-cgi"
+    },
+    "SSL" : {
+        "ip" : "127.0.0.1",
+        "port" : "22222"
     }
 }

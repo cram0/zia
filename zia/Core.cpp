@@ -26,10 +26,29 @@ Core::~Core()
     }
 }
 
+void Core::updateModule(const ModuleType &cm)
+{
+    unregisterModule(cm);
+    registerModule(cm);
+}
+
+void Core::loadModulesFromConf(const std::vector<ModuleType> &confModules)
+{
+    for (const ModuleType &cm : confModules) {
+        if (modules.find(cm) == modules.end()) {
+            registerModule(cm);
+        }
+        else {
+            updateModule(cm);
+        }
+    }
+}
+
 void Core::loadConfig(std::string const &path)
 {
     Config *config = (Config *)getConfig();
     config->loadConfig(path);
+    loadModulesFromConf(config->getModules());
 }
 
 void Core::listModules() const
@@ -147,9 +166,10 @@ void Core::registerModule(ModuleType type)
 void Core::unregisterModule(ModuleType type)
 {
     if (modules.find(type) == modules.end()) {
-        std::cout << "Unregistering module of type " << type << " failed probably not in the list or already removed" << std::endl;
+        std::cout << "Unregistering module of type " << type << " failed, probably not in the list or already removed" << std::endl;
         return;
     }
+    modules[type]->unload();
     delete modules[type];
     #if(_WIN32)
         FreeLibrary(modules_handles[type]);

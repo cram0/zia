@@ -35,6 +35,7 @@ Ssl::Ssl()
     type = ModuleType::PHP_CGI;
     name = "SslName";
     std::cout << "Ssl created" << std::endl;
+    running = true;
 
     ssl_utils::init_ssl();
 }
@@ -107,9 +108,7 @@ void Ssl::processRequest(int s_conn)
         std::cout << "Unable to set fd to SSL object" << std::endl;
         ERR_print_errors_fp(stderr);
 
-        SSL_shutdown(ssl);
-        SSL_free(ssl);
-        SSL_CTX_free(ctx);
+        ssl_utils::shutdown_ssl(ssl, ctx);
 #if(_WIN32)
         closesocket(s_conn);
 #else
@@ -125,9 +124,7 @@ void Ssl::processRequest(int s_conn)
         std::cout << "Unable to accept SSL object" << std::endl;
         ssl_utils::SSL_print_error(ssl, ac_err);
 
-        SSL_shutdown(ssl);
-        SSL_free(ssl);
-        SSL_CTX_free(ctx);
+        ssl_utils::shutdown_ssl(ssl, ctx);
 #if(_WIN32)
         closesocket(s_conn);
 #else
@@ -145,9 +142,7 @@ void Ssl::processRequest(int s_conn)
     if (ssl_read_size <= 0) {
         ssl_utils::SSL_print_error(ssl, ssl_read_size);
 
-        SSL_shutdown(ssl);
-        SSL_free(ssl);
-        SSL_CTX_free(ctx);
+        ssl_utils::shutdown_ssl(ssl, ctx);
 #if(_WIN32)
         closesocket(s_conn);
 #else
@@ -228,9 +223,7 @@ void Ssl::processRequest(int s_conn)
         SSL_write(ssl, response.str().c_str(), (int)response.str().length());
     }
 
-    SSL_shutdown(ssl);
-    SSL_free(ssl);
-    SSL_CTX_free(ctx);
+    ssl_utils::shutdown_ssl(ssl, ctx);
 #if(_WIN32)
     closesocket(s_conn);
 #else
@@ -298,7 +291,8 @@ void Ssl::run()
         exit(1);
     }
 #endif
-    while(true) {
+
+    while(running) {
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
@@ -316,6 +310,13 @@ void Ssl::run()
         std::thread th(&Ssl::processRequest, *this, s_conn);
         th.detach();
     }
+
+#if(_WIN32)
+        closesocket(s_listen);
+#else
+        close(s_listen);
+#endif
+
 }
 
 bool Ssl::load(std::any payload)
@@ -325,6 +326,7 @@ bool Ssl::load(std::any payload)
 
 bool Ssl::unload()
 {
+    running = false;
     return true;
 }
 

@@ -31,6 +31,7 @@ class ZIA_API Network : public IModule {
         ICore *core;
         std::string name;
         ModuleType type;
+        bool running;
    public:
         Network();
         Network(ICore &coreRef);
@@ -45,7 +46,7 @@ class ZIA_API Network : public IModule {
         std::string getName() const;
         ModuleType getType() const;
 
-    [[noreturn]] void run();
+        void run();
 #if(_WIN32)
         void processRequest(SOCKET s_conn);
 #else

@@ -24,9 +24,9 @@ int main(int ac, char **av)
 
     core.loadConfig("../../config.json");
 
-    core.registerModule(ModuleType::PHP_CGI);
-    core.registerModule(ModuleType::NETWORK);
-    core.registerModule(ModuleType::SSL_MODULE);
+    // core.registerModule(ModuleType::PHP_CGI);
+    // core.registerModule(ModuleType::NETWORK);
+    // core.registerModule(ModuleType::SSL_MODULE);
 
     char c;
     std::cin >> c;

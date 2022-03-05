@@ -39,6 +39,7 @@ class ZIA_API Ssl : public IModule, public ISsl {
 
         sockaddr_in m_infos{};
         int s_serv{};
+        bool running;
     public:
         Ssl();
         Ssl(ICore &coreRef);
@@ -46,7 +47,7 @@ class ZIA_API Ssl : public IModule, public ISsl {
         void setCore(ICore &coreRef);
         ICore *getCore() const;
 
-    [[noreturn]] void run();
+        void run();
         void setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback);
         void sendReponse(std::string HttpsResponse);
 

@@ -35,6 +35,8 @@ class Core : public ICore {
         void listModules() const;
         IConfig *getConfig() const;
         IModule *getModule(ModuleType type) const;
+        void updateModule(const ModuleType &cm);
+        void loadModulesFromConf(const std::vector<ModuleType> &confModules);
         void registerModule(ModuleType type);
         void unregisterModule(ModuleType type);
         std::unordered_map<ModuleType, IModule *> getModules() const;

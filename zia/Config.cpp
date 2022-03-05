@@ -25,7 +25,6 @@ void Config::loadConfig(const std::string &path)
 
     if (ifs.is_open()) {
         ifs >> m_config;
-        std::cout << m_config.dump(4) << std::endl;
         ifs.close();
     }
     else {
@@ -37,17 +36,30 @@ void Config::loadConfig(const std::string &path)
 std::vector<ModuleType> Config::getModules() const
 {
     std::vector<ModuleType> test;
+
+    if (m_config.find("Network") != m_config.end())
+        test.emplace_back(ModuleType::NETWORK);
+    if (m_config.find("PhpCgi") != m_config.end())
+        test.emplace_back(ModuleType::PHP_CGI);
+    if (m_config.find("SSL") != m_config.end())
+        test.emplace_back(ModuleType::SSL_MODULE);
+
     return test;
 }
+
 
 // Lire la key donnée en parametre et renvoyer sa value
 const std::any Config::operator[](const char *key)
 {
-    return "test";
+    if (validKey(key))
+        return json::()
+    return nullptr;
 }
 
 // Verifie si la key existe dans le fichier json
 bool Config::validKey(const char *key) const
 {
+    if (m_config.find(key) == m_config.end())
+        return false;
     return true;
 }
