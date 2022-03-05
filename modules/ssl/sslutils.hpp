@@ -39,12 +39,12 @@ namespace ssl_utils
 
     void configure_context(SSL_CTX *ctx)
     {
-        if (SSL_CTX_use_certificate_file(ctx, "../../modules/ssl/localhost.crt", SSL_FILETYPE_PEM) <= 0) {
+        if (SSL_CTX_use_certificate_file(ctx, "modules/ssl/localhost.crt", SSL_FILETYPE_PEM) <= 0) {
             ERR_print_errors_fp(stderr);
             exit(EXIT_FAILURE);
         }
 
-        if (SSL_CTX_use_PrivateKey_file(ctx, "../../modules/ssl/localhost.key", SSL_FILETYPE_PEM) <= 0 ) {
+        if (SSL_CTX_use_PrivateKey_file(ctx, "modules/ssl/localhost.key", SSL_FILETYPE_PEM) <= 0 ) {
             ERR_print_errors_fp(stderr);
             exit(EXIT_FAILURE);
         }

@@ -1,21 +1,21 @@
-cmake_minimum_required(VERSION 3.10)
-set(CMAKE_CXX_STANDARD 17)
-if (UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -lpthread")
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-project(ssl VERSION 1.0)
+cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG   ${PROJECT_SOURCE_DIR}/lib)
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/lib)
 add_library(ssl SHARED
     Ssl.cpp
     ../../Zia/Request.cpp
 )
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(ssl PRIVATE Threads::Threads)
 target_link_libraries(ssl PUBLIC CONAN_PKG::openssl)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-
 set_target_properties(ssl PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
-# set_target_properties(ssl PROPERTIES VERSION ${PROJECT_VERSION})
 
 target_include_directories(ssl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(ssl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../network)

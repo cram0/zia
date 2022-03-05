@@ -191,7 +191,7 @@ void Ssl::processRequest(int s_conn)
     // Debug
     // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
-    std::string full_path = "../../www" + request_file;
+    std::string full_path = "www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension().string();
 
     Request request(s_conn, full_path, ssl);
