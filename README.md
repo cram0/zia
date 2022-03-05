@@ -17,8 +17,14 @@ open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect d
 #### Linux/Mac (Unix)
 open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) change **`compiler.libcxx=libstdc`** -> **`compiler.libcxx=libstdc++11`**
    
-### Windows
-- install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
+## PhPCGI
+#### Ubuntu
+```bash
+sudo apt install php-cgi
+```
+#### Windows
+- install [phpcgi-8](https://windows.php.net/downloads/releases/php-8.1.3-nts-Win32-vs16-x64.zip)
+
 
 ## Build Project
 
@@ -40,6 +46,8 @@ mkdir build && cd build && conan install .. --build=missing && cmake .. -G "Unix
 ```
 
 - ### Windows
+- install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
+ 
 1. `mkdir build`
 2. `cd build`
 3. `conan install .. --build=missing`
