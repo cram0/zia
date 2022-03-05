@@ -53,7 +53,11 @@ public:
         std::string m_data;
         std::string m_file_path;
         bool m_file_valid;
+#if(_WIN32)
+        SOCKET m_socket;
+#else
         int m_socket;
+#endif
         SSL* m_ssl = nullptr;
 };
 

@@ -30,7 +30,7 @@
 #    define ZIA_API
 #endif
 
-class Ssl : public IModule, public ISsl {
+class ZIA_API Ssl : public IModule, public ISsl {
     private:
         ICore *core{};
         std::string name;
