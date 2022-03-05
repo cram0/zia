@@ -9,12 +9,11 @@
 
 #include <iostream>
 
-Request::Request()
-{
-
-}
-
+#if(_WIN32)
+Request::Request(SOCKET socket, const std::string &file_path, SSL *ssl)
+#else
 Request::Request(int socket, const std::string &file_path, SSL *ssl)
+#endif
 {
     m_socket = socket;
     m_file_path = file_path;
@@ -41,7 +40,11 @@ void Request::setData(const std::string &data)
     m_data = data;
 }
 
+#if(_WIN32)
+const SOCKET Request::getSocket() const
+#else
 const int Request::getSocket() const
+#endif
 {
     return m_socket;
 }
@@ -63,5 +66,4 @@ void Request::setSsl(SSL *ssl)
 
 Request::~Request()
 {
-
 }

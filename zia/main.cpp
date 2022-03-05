@@ -8,9 +8,6 @@
 #include "Core.hpp"
 #include "Config.hpp"
 
-#include "Network.hpp"
-#include "Ssl.hpp"
-
 #include <thread>
 
 int displayHelp()
@@ -24,23 +21,15 @@ int main(int ac, char **av)
     if (ac == 2 && av[1][0] == '-' && av[1][1] == 'h') return displayHelp();
 
     Core core;
-    
+
     core.loadConfig("../../config.json");
 
-    // core.registerModule(ModuleType::PHP_CGI);
-    // core.registerModule(ModuleType::NETWORK);
-    // core.registerModule(ModuleType::SSL_MODULE);
-    // Network *net = (Network *)core.getModule(ModuleType::NETWORK);
-    // Ssl *ssl = (Ssl *)core.getModule(ModuleType::SSL_MODULE);
+    core.registerModule(ModuleType::PHP_CGI);
+    core.registerModule(ModuleType::NETWORK);
+    core.registerModule(ModuleType::SSL_MODULE);
 
-    // std::thread ssl_th(&Ssl::run, ssl);
-    // ssl_th.detach();
-
-    // std::thread net_th(&Network::run, net);
-    // net_th.detach();
-
-    // char c;
-    // std::cin >> c;
+    char c;
+    std::cin >> c;
 
     return (0);
 }

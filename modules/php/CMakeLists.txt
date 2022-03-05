@@ -8,7 +8,9 @@ project(php VERSION 1.0)
 
 add_library(php SHARED
     PhpCgi.cpp
+    ../../zia/Request.cpp
 )
+target_link_libraries(php PUBLIC CONAN_PKG::openssl)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 

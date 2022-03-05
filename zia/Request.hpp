@@ -9,9 +9,13 @@
 #define REQUEST_HPP_
 
 #include <string>
+#if(_WIN32)
+#include <WinSock2.h>
+#else
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
+#endif
 #include <unordered_map>
 #include <algorithm>
 
@@ -19,8 +23,12 @@
 
 class Request {
     public:
-        Request();
-        Request(int socket, const std::string &file_path, SSL *ssl);
+public:
+#if(_WIN32)
+            Request(SOCKET socket, const std::string &file_path, SSL *ssl);
+       #else
+            Request(int socket, const std::string &file_path, SSL *ssl);
+       #endif
 
         const std::string getFilePath() const;
         void setFilePath(const std::string &file_path);
@@ -28,8 +36,13 @@ class Request {
         const std::string getData() const;
         void setData(const std::string &data);
 
+#if(_WIN32)
+        const SOCKET getSocket() const;
+#else
         const int getSocket() const;
-        void setSocket(int socket);
+#endif
+
+    void setSocket(int socket);
 
         SSL *getSsl() const;
         void setSsl(SSL *ssl);
@@ -40,7 +53,11 @@ class Request {
         std::string m_data;
         std::string m_file_path;
         bool m_file_valid;
+#if(_WIN32)
+        SOCKET m_socket;
+#else
         int m_socket;
+#endif
         SSL* m_ssl = nullptr;
 };
 
