@@ -2,6 +2,7 @@
 *.dll
 *.so
 zia
+zia.exe
 *.o
 .vscode/
 www/*.png
