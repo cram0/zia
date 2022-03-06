@@ -16,7 +16,7 @@ IMPLEMENT : https://github.com/nlohmann/json#integration
 open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) in `[setting]` block add **`compiler.runtime=static`**
 #### Linux/Mac (Unix)
 open `~/.conan/profiles/default`(if not exist run: `conan profile new --detect default`) change **`compiler.libcxx=libstdc`** -> **`compiler.libcxx=libstdc++11`**
-   
+
 ## PhPCGI
 #### Ubuntu
 ```bash
@@ -37,25 +37,24 @@ sudo apt install php-cgi
 1. `mkdir build`
 2. `cd build`
 3. `conan install .. --build=missing`
-4. `cmake .. -G "Unix Makefiles"  -DMAKE_BUILD_TYPE=Release`
+4. `cmake .. -G "Unix Makefiles"  -D CMAKE_BUILD_TYPE=Release`
 5. `cmake --build . --config Release`
 
- one line command: 
+ one line command:
 ```bash
-mkdir build && cd build && conan install .. --build=missing && cmake .. -G "Unix Makefiles" -DMAKE_BUILD_TYPE=Release && cmake --build . --config Release
+mkdir build && cd build && conan install .. --build=missing && cmake .. -G "Unix Makefiles" -D CMAKE_BUILD_TYPE=Release && cmake --build . --config Release
 ```
 
 - ### Windows
 - install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
- 
+
 1. `mkdir build`
 2. `cd build`
 3. `conan install .. --build=missing`
-4. `cmake ..  -G "Visual Studio 17 2022" -A "x64" -DMAKE_BUILD_TYPE=Release`
+4. `cmake ..  -G "Visual Studio 17 2022" -A "x64" -D CMAKE_BUILD_TYPE=Release`
 5. `cmake --build . --config Release`
- 
- one line command(powershell only!): 
-```pwsh
-mkdir build && cd build && conan install .. --build=missing && cmake ..  -G "Visual Studio 17 2022" -A "x64" -DMAKE_BUILD_TYPE=Release && cmake --build . --config Release
-```
 
+ one line command(powershell only!):
+```pwsh
+mkdir build && cd build && conan install .. --build=missing && cmake ..  -G "Visual Studio 17 2022" -A "x64" -D CMAKE_BUILD_TYPE=Release && cmake --build . --config Release
+```
