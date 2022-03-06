@@ -9,6 +9,7 @@
 #include "Network.hpp"
 #include "Request.hpp"
 #include "ISsl.hpp"
+#include "Config.hpp"
 
 #if(_WIN32)
 #include <WinSock2.h>
@@ -17,8 +18,6 @@
 #include <io.h>
 #else
 #include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #endif
 
 #include <istream>
@@ -34,6 +33,7 @@ Network::Network()
     name = "NetworkName";
     std::cout << "Network created" << std::endl;
     core = nullptr;
+    running = true;
 }
 
 Network::Network(ICore &coreRef) : Network()
@@ -144,11 +144,29 @@ void Network::processRequest(int s_conn)
         send(s_conn, response.str().c_str(), response.str().length(), 0);
         close(s_conn);
 #endif
-        return;
     }
 }
 
-[[noreturn]] void Network::run()
+void Network::setConfig(const char *confKey, sockaddr_in *server)
+{
+    Config *config = (Config *)getCore()->getConfig();
+    auto conf = std::any_cast<std::unordered_map<std::string, json>>((*config)[confKey]);
+
+    if (conf != nullptr) {
+        if (isValidIpv4(conf["ip"]))
+            server->sin_addr.s_addr = inet_addr(conf["ip"].get<std::string>().c_str());
+        else
+            std::cout << "Invalid ipv4" << std::endl;
+        if (isValidPort(conf["port"])) {
+            std::string port = conf["port"].get<std::string>();
+            server->sin_port = htons(std::atoi(port.c_str()));
+        }
+        else
+            std::cout << "Invalid port" << std::endl;
+    }
+}
+
+void Network::run()
 {
 #if(_WIN32)
     //----------------------
@@ -170,6 +188,8 @@ void Network::processRequest(int s_conn)
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_port = htons(11111);
+
+    setConfig("Network", &server);
 
     auto s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 
@@ -220,7 +240,7 @@ void Network::processRequest(int s_conn)
     }
 #endif
 
-    while(true) {
+    while(running) {
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
@@ -243,6 +263,13 @@ void Network::processRequest(int s_conn)
         std::thread request(&Network::processRequest, this, s_conn);
         request.detach();
     }
+
+#if(_WIN32)
+        closesocket(s_listen);
+#else
+        close(s_listen);
+#endif
+
 }
 
 ICore *Network::getCore() const
@@ -291,6 +318,7 @@ bool Network::load(std::any payload)
 
 bool Network::unload()
 {
+    running = false;
     return true;
 }
 

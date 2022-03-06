@@ -11,10 +11,10 @@ add_library(network SHARED
 find_package(Threads REQUIRED)
 target_link_libraries(network PRIVATE Threads::Threads)
 target_link_libraries(network PUBLIC CONAN_PKG::openssl)
+target_link_libraries(network PUBLIC CONAN_PKG::nlohmann_json)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 set_target_properties(network PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
-
 
 target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(network PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../zia-api)

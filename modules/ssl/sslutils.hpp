@@ -20,6 +20,13 @@ namespace ssl_utils
         OpenSSL_add_all_algorithms();
     }
 
+    void shutdown_ssl(SSL* ssl, SSL_CTX *ctx)
+    {
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+    }
+
     SSL_CTX *create_context()
     {
         const SSL_METHOD *method;

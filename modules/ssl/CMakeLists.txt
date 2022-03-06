@@ -13,6 +13,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(ssl PRIVATE Threads::Threads)
 target_link_libraries(ssl PUBLIC CONAN_PKG::openssl)
+target_link_libraries(ssl PUBLIC CONAN_PKG::nlohmann_json)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 set_target_properties(ssl PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})

@@ -22,11 +22,7 @@ int main(int ac, char **av)
 
     Core core;
 
-    core.loadConfig("../../config.json");
-
-    core.registerModule(ModuleType::PHP_CGI);
-    core.registerModule(ModuleType::NETWORK);
-    core.registerModule(ModuleType::SSL_MODULE);
+    core.loadConfig("config.json");
 
     char c;
     std::cin >> c;
