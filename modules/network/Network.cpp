@@ -39,6 +39,7 @@ Network::Network()
 Network::Network(ICore &coreRef) : Network()
 {
     core = &coreRef;
+    std::cout << "Network init : running ? " << running << std::endl;
     std::thread th(&Network::run, this);
     th.detach();
 }
@@ -213,15 +214,15 @@ void Network::run()
 
     s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 
-    // if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
-    //     std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
-    //     exit(1);
-    // }
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
+        exit(1);
+    }
 
-    // if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
-    //     std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-    //     exit(1);
-    // }
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
+        exit(1);
+    }
 
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
@@ -263,18 +264,18 @@ void Network::run()
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
-        std::cout << "Awaiting connections ..." << std::endl;
+        std::cout << "Network Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
             closesocket(s_listen);
             WSACleanup();
-            exit(1);
         }
 #else
-        if (s_conn == -1) {
-            std::cerr << "Accept Network error" << std::endl;
+        if (s_conn == -1)    {
+            perror("Accept network error");
+            running = false;
             close(s_listen);
         }
 #endif

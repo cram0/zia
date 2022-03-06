@@ -170,7 +170,7 @@ void Core::unregisterModule(ModuleType type)
         return;
     }
     modules[type]->unload();
-    delete modules[type];
+    // delete modules[type];
 #if(_WIN32)
     FreeLibrary(modules_handles[type]);
 #else
