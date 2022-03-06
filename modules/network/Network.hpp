@@ -35,6 +35,11 @@ class ZIA_API Network : public IModule {
         std::string name;
         ModuleType type;
         bool running;
+#if(_WIN32)
+        SOCKET s_listen;
+#else
+        int s_listen;
+#endif
    public:
         Network();
         Network(ICore &coreRef);

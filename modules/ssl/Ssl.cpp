@@ -35,6 +35,7 @@ Ssl::Ssl()
     type = ModuleType::PHP_CGI;
     name = "SslName";
     std::cout << "Ssl created" << std::endl;
+    core = nullptr;
     running = true;
 
     ssl_utils::init_ssl();
@@ -43,13 +44,19 @@ Ssl::Ssl()
 Ssl::Ssl(ICore &coreRef) : Ssl()
 {
     core = &coreRef;
-    std::thread th(&Ssl::run, *this);
+    std::thread th(&Ssl::run, this);
     th.detach();
 }
 
 Ssl::~Ssl()
 {
-
+    std::cout << "SSL destroyed" << std::endl;
+#if(_WIN32)
+    closesocket(s_listen);
+    WSACleanup();
+#else
+    close(s_listen);
+#endif
 }
 
 void Ssl::setCore(ICore &coreRef)
@@ -170,6 +177,7 @@ void Ssl::processRequest(int s_conn)
 #else
         close(s_conn);
 #endif
+        ssl_utils::shutdown_ssl(ssl, ctx);
         return;
     }
 
@@ -180,11 +188,9 @@ void Ssl::processRequest(int s_conn)
 #else
         close(s_conn);
 #endif
+        ssl_utils::shutdown_ssl(ssl, ctx);
         return;
     }
-
-    // Debug
-    // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "www" + request_file;
     std::string file_extension = std::filesystem::path(full_path).extension().string();
@@ -193,14 +199,22 @@ void Ssl::processRequest(int s_conn)
 
     std::ifstream f_data(full_path);
 
-    // Debug
-    // std::cout << "File : " << full_path << std::endl;
-
     if (f_data.is_open()) {
-        // Debug
-        // std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
-            getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
+            if (getCore()->getModule(ModuleType::PHP_CGI)) {
+                getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
+            }
+            else {
+                std::ostringstream response;
+                response << "HTTP/1.1 404 NOT FOUND\r\n";
+                response << "Content-Length: " << 0;
+                response << "\r\n\r\n";
+
+                if (request.getData().length() > INT_MAX) {
+                    std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() <<")" << std::endl;
+                }
+                SSL_write(ssl, response.str().c_str(), (int)response.str().length());
+            }
         }
         else {
             std::stringstream data;
@@ -210,8 +224,6 @@ void Ssl::processRequest(int s_conn)
         }
     }
     else {
-        // Debug
-        // std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
         response << "Content-Length: " << 0;
@@ -252,30 +264,36 @@ void Ssl::setConfig(const char *confKey, sockaddr_in *server)
 
 void Ssl::run()
 {
-    m_infos.sin_addr.s_addr = inet_addr("127.0.0.1");
-    m_infos.sin_family = AF_INET;
-    m_infos.sin_port = htons(22222);
-
-    setConfig("SSL", &m_infos);
-
-    int CHUNK_SIZE = 4096;
 #if(_WIN32)
+    //----------------------
+    // Initialize Windsock.
+    WSADATA wsaData;
+    int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (iResult != NO_ERROR) {
+        wprintf(L"WSAStartup failed with error: %ld\n", iResult);
+        exit(1);
+    }
     SOCKET s_conn;
     const char enable = 1;
 #else
     int s_conn = -1;
     int enable = 1;
 #endif
-    auto s_listen = socket(AF_INET, SOCK_STREAM, 0);
 
-    // Supprimer en production //
+    sockaddr_in server{};
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_port = htons(22222);
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
-        std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
-        exit(1);
-    }
+    setConfig("SSL", &server);
 
-    // Supprimer en production //
+    s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+
+    // if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+    //     std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
+    //     exit(1);
+    // }
+
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
@@ -283,7 +301,7 @@ void Ssl::run()
         exit(1);
     }
 
-    if (bind(s_listen, (sockaddr *)&m_infos, sizeof(m_infos)) == SOCKET_ERROR) {
+    if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
@@ -302,7 +320,7 @@ void Ssl::run()
         exit(1);
     }
 
-    if (bind(s_listen, (sockaddr *)&m_infos, sizeof(m_infos)) < 0) {
+    if (bind(s_listen, (sockaddr *)&server, sizeof(server)) < 0) {
         std::cerr << "Socket binding error" << std::endl;
         exit(1);
     }
@@ -322,22 +340,25 @@ void Ssl::run()
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
+            closesocket(s_listen);
+            WSACleanup();
+            exit(1);
         }
 #else
         if (s_conn == -1) {
             std::cerr << "Accept SSL error" << std::endl;
         }
 #endif
-        std::thread th(&Ssl::processRequest, *this, s_conn);
+        std::thread th(&Ssl::processRequest, this, s_conn);
         th.detach();
     }
 
 #if(_WIN32)
         closesocket(s_listen);
 #else
+        std::cout << "SSL : Closing listening socket" << std::endl;
         close(s_listen);
 #endif
-
 }
 
 bool Ssl::load(std::any payload)
@@ -347,6 +368,7 @@ bool Ssl::load(std::any payload)
 
 bool Ssl::unload()
 {
+    std::cout << "Unloaded SSL Module" << std::endl;
     running = false;
     return true;
 }

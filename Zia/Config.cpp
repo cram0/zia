@@ -47,7 +47,6 @@ std::vector<ModuleType> Config::getModules() const
     return test;
 }
 
-
 // Lire la key donnée en parametre et renvoyer sa value
 const std::any Config::operator[](const char *key)
 {

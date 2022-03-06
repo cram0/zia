@@ -38,10 +38,12 @@ class ZIA_API Ssl : public IModule, public ISsl {
         std::string name;
         ModuleType type;
         std::function<void(std::string HttpsRequestBuffer)> m_requestCallback;
-
-        sockaddr_in m_infos{};
-        int s_serv{};
         bool running;
+#if(_WIN32)
+        SOCKET s_listen;
+#else
+        int s_listen;
+#endif
     public:
         Ssl();
         Ssl(ICore &coreRef);

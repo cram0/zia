@@ -39,7 +39,7 @@ Network::Network()
 Network::Network(ICore &coreRef) : Network()
 {
     core = &coreRef;
-    std::thread th(&Network::run, *this);
+    std::thread th(&Network::run, this);
     th.detach();
 }
 
@@ -47,7 +47,10 @@ Network::~Network()
 {
     std::cout << "Network destroyed" << std::endl;
 #if(_WIN32)
+    closesocket(s_listen);
     WSACleanup();
+#else
+    close(s_listen);
 #endif
 }
 
@@ -116,8 +119,25 @@ void Network::processRequest(int s_conn)
         // Debug
         std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
-            getCore()->send(request, ModuleType::NETWORK,  ModuleType::PHP_CGI);
-            return;
+            if (getCore()->getModule(ModuleType::PHP_CGI)) {
+                getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
+            }
+            else {
+                std::ostringstream response;
+                response << "HTTP/1.1 404 NOT FOUND\r\n";
+                response << "Content-Length: " << 0;
+                response << "\r\n\r\n";
+#if(_WIN32)
+                if (response.str().length() > MAXINT32)
+                    throw;
+                send(s_conn, response.str().c_str(), (int)response.str().length(), 0);
+                closesocket(s_conn);
+#else
+                send(s_conn, response.str().c_str(), response.str().length(), 0);
+                close(s_conn);
+#endif
+                return;
+            }
         }
         else {
             std::stringstream data;
@@ -178,7 +198,7 @@ void Network::run()
         exit(1);
     }
     SOCKET s_conn;
-   const char enable = 1;
+    const char enable = 1;
 #else
     int s_conn = -1;
     int enable = 1;
@@ -191,18 +211,17 @@ void Network::run()
 
     setConfig("Network", &server);
 
-    auto s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+    s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 
-    // Supprimer en production //
-//    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
-//        std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
-//        exit(1);
-//    }
-//
-//    if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
-//        std::cerr << "network setsockopt(SO_BROADCAST) failed" << std::endl;
-//        exit(1);
-//    }
+    // if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+    //     std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
+    //     exit(1);
+    // }
+
+    // if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
+    //     std::cerr << "network setsockopt(SO_BROADCAST) failed" << std::endl;
+    //     exit(1);
+    // }
 
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
@@ -246,7 +265,6 @@ void Network::run()
 
         std::cout << "Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
-
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
@@ -256,10 +274,9 @@ void Network::run()
         }
 #else
         if (s_conn == -1) {
-            std::cerr << "Accept error" << std::endl;
+            std::cerr << "Accept Network error" << std::endl;
         }
 #endif
-
         std::thread request(&Network::processRequest, this, s_conn);
         request.detach();
     }
@@ -267,9 +284,9 @@ void Network::run()
 #if(_WIN32)
         closesocket(s_listen);
 #else
+        std::cout << "Network : Closing listening socket" << std::endl;
         close(s_listen);
 #endif
-
 }
 
 ICore *Network::getCore() const
@@ -318,6 +335,7 @@ bool Network::load(std::any payload)
 
 bool Network::unload()
 {
+    std::cout << "Unloaded module Network" << std::endl;
     running = false;
     return true;
 }
