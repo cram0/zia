@@ -352,10 +352,13 @@ void Ssl::run()
 #else
         if (s_conn == -1) {
             std::cerr << "Accept SSL error" << std::endl;
+            close(s_listen);
         }
 #endif
-        std::thread th(&Ssl::processRequest, this, s_conn);
-        th.detach();
+        else {
+            std::thread th(&Ssl::processRequest, this, s_conn);
+            th.detach();
+        }
     }
 
 #if(_WIN32)

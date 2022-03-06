@@ -275,10 +275,13 @@ void Network::run()
 #else
         if (s_conn == -1) {
             std::cerr << "Accept Network error" << std::endl;
+            close(s_listen);
         }
 #endif
-        std::thread request(&Network::processRequest, this, s_conn);
-        request.detach();
+        else {
+            std::thread request(&Network::processRequest, this, s_conn);
+            request.detach();
+        }
     }
 
 #if(_WIN32)
