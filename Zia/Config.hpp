@@ -10,7 +10,7 @@
 #include "IConfig.hpp"
 #include <nlohmann/json.hpp>
 
-#include <bits/stdc++.h>
+#include <regex>
 
 // SO THAT WE DONT WASTE 20 FUCKING COLUMNS BECAUSE THE NAMESPACE IS WAY TOO LONG
 using json = nlohmann::json;
