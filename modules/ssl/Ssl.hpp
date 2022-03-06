@@ -10,6 +10,8 @@
 
 #include "IModule.hpp"
 #include "ISsl.hpp"
+#include "Config.hpp"
+#include <nlohmann/json.hpp>
 
 #if(_WIN32)
 #include <WinSock2.h>
@@ -39,6 +41,7 @@ class ZIA_API Ssl : public IModule, public ISsl {
 
         sockaddr_in m_infos{};
         int s_serv{};
+        bool running;
     public:
         Ssl();
         Ssl(ICore &coreRef);
@@ -46,7 +49,8 @@ class ZIA_API Ssl : public IModule, public ISsl {
         void setCore(ICore &coreRef);
         ICore *getCore() const;
 
-    [[noreturn]] void run();
+        void run();
+        void setConfig(const char *confKey, sockaddr_in *server);
         void setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback);
         void sendReponse(std::string HttpsResponse);
 

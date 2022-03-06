@@ -10,6 +10,9 @@
 
 #if(_WIN32)
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 #include "IModule.hpp"
@@ -31,6 +34,7 @@ class ZIA_API Network : public IModule {
         ICore *core;
         std::string name;
         ModuleType type;
+        bool running;
    public:
         Network();
         Network(ICore &coreRef);
@@ -44,8 +48,9 @@ class ZIA_API Network : public IModule {
         bool unload();
         std::string getName() const;
         ModuleType getType() const;
+        void setConfig(const char *confKey, sockaddr_in *server);
 
-    [[noreturn]] void run();
+        void run();
 #if(_WIN32)
         void processRequest(SOCKET s_conn);
 #else
