@@ -218,43 +218,43 @@ void Network::run()
     //     exit(1);
     // }
 
-    // if (setsockopt(s_listen, SOL_SOCKET, SO_BROADCAST, &enable, sizeof(int)) < 0) {
-    //     std::cerr << "network setsockopt(SO_BROADCAST) failed" << std::endl;
+    // if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+    //     std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
     //     exit(1);
     // }
 
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
-        wprintf(L"socket failed with error: %ld\n", WSAGetLastError());
+        wprintf(L"Network socket failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
         exit(1);
     }
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
-        wprintf(L"bind failed with error: %ld\n", WSAGetLastError());
+        wprintf(L"Network bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
         exit(1);
     }
 
     if (listen(s_listen, 10) == SOCKET_ERROR) {
-        wprintf(L"listen failed with error: %ld\n", WSAGetLastError());
+        wprintf(L"Network listen failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
         exit(1);
     }
 #else
     if (s_listen == -1) {
-        std::cerr << "Socket creation error" << std::endl;
+        std::cerr << "Network Socket creation error" << std::endl;
         exit(1);
     }
 
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) < 0) {
-        std::cerr << "Socket binding error" << std::endl;
+        std::cerr << "Network Socket binding error" << std::endl;
         exit(1);
     }
 
     if (listen(s_listen, 10) < 0) {
-        std::cerr << "Socket listening error" << std::endl;
+        std::cerr << "Network Socket listening error" << std::endl;
         exit(1);
     }
 #endif
