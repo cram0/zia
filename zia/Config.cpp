@@ -52,7 +52,7 @@ std::vector<ModuleType> Config::getModules() const
 const std::any Config::operator[](const char *key)
 {
     if (validKey(key))
-        return json::()
+        return m_config[key].get<std::unordered_map<std::string, json>>();
     return nullptr;
 }
 

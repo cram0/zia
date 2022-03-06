@@ -9,6 +9,7 @@
 #include "Network.hpp"
 #include "Request.hpp"
 #include "ISsl.hpp"
+#include "Config.hpp"
 
 #if(_WIN32)
 #include <WinSock2.h>
@@ -17,8 +18,6 @@
 #include <io.h>
 #else
 #include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #endif
 
 #include <istream>
@@ -148,6 +147,25 @@ void Network::processRequest(int s_conn)
     }
 }
 
+void Network::setConfig(const char *confKey, sockaddr_in *server)
+{
+    Config *config = (Config *)getCore()->getConfig();
+    auto conf = std::any_cast<std::unordered_map<std::string, json>>((*config)[confKey]);
+
+    if (conf != nullptr) {
+        if (isValidIpv4(conf["ip"]))
+            server->sin_addr.s_addr = inet_addr(conf["ip"].get<std::string>().c_str());
+        else
+            std::cout << "Invalid ipv4" << std::endl;
+        if (isValidPort(conf["port"])) {
+            std::string port = conf["port"].get<std::string>();
+            server->sin_port = htons(std::atoi(port.c_str()));
+        }
+        else
+            std::cout << "Invalid port" << std::endl;
+    }
+}
+
 void Network::run()
 {
 #if(_WIN32)
@@ -171,7 +189,7 @@ void Network::run()
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_port = htons(11111);
 
-    // Put config here
+    setConfig("Network", &server);
 
     auto s_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
 

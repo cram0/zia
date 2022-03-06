@@ -11,6 +11,7 @@ add_library(ssl SHARED
     ../../zia/Request.cpp
 )
 target_link_libraries(ssl PUBLIC CONAN_PKG::openssl)
+target_link_libraries(ssl PUBLIC CONAN_PKG::nlohmann_json)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 

@@ -10,6 +10,9 @@
 
 #if(_WIN32)
 #include <WinSock2.h>
+#else
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 #include "IModule.hpp"
@@ -45,6 +48,7 @@ class ZIA_API Network : public IModule {
         bool unload();
         std::string getName() const;
         ModuleType getType() const;
+        void setConfig(const char *confKey, sockaddr_in *server);
 
         void run();
 #if(_WIN32)

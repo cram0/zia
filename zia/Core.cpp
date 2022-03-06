@@ -171,11 +171,11 @@ void Core::unregisterModule(ModuleType type)
     }
     modules[type]->unload();
     delete modules[type];
-    #if(_WIN32)
-        FreeLibrary(modules_handles[type]);
-    #else
-        dlclose(modules_handles[type]);
-    #endif
+#if(_WIN32)
+    FreeLibrary(modules_handles[type]);
+#else
+    dlclose(modules_handles[type]);
+#endif
     modules.erase(type);
     modules_handles.erase(type);
     std::cout << "Succesfully deleted module of type " << type << std::endl;

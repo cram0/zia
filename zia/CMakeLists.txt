@@ -13,13 +13,15 @@ add_executable(zia
 )
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 find_package(Threads REQUIRED)
+
 target_link_libraries(zia PRIVATE Threads::Threads)
 target_link_libraries(zia PRIVATE ${CMAKE_DL_LIBS})
+target_link_libraries(zia PRIVATE CONAN_PKG::nlohmann_json)
 
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../zia-api)
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/network)
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/php)
 target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ssl)
-target_include_directories(zia PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib)
