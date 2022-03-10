@@ -139,6 +139,8 @@ void Network::processRequest(int s_conn)
 #endif
                 return;
             }
+
+            f_data.close();
         }
         else {
             std::stringstream data;

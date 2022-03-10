@@ -223,6 +223,8 @@ void Ssl::processRequest(int s_conn)
             request.setData(data.str());
             receive(request, ModuleType::NETWORK);
         }
+
+        f_data.close();
     }
     else {
         std::ostringstream response;
