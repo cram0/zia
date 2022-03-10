@@ -107,6 +107,8 @@ void Ssl::processRequest(SOCKET s_conn)
 void Ssl::processRequest(int s_conn)
 #endif
 {
+    if (running == false) return;
+
     SSL_CTX *ctx = ssl_utils::create_context();
     ssl_utils::configure_context(ctx);
     SSL *ssl = SSL_new(ctx);
@@ -352,7 +354,7 @@ void Ssl::run()
             WSACleanup();
         }
 #else
-        if (s_conn == -1) {
+        if (s_conn == -1 && errno == EBADF) {
             std::cerr << "Accept SSL error" << std::endl;
             running = false;
             close(s_listen);
