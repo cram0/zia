@@ -44,22 +44,99 @@ class ZIA_API Network : public IModule {
         Network();
         Network(ICore &coreRef);
         ~Network();
-        // Get core
+
+        /**
+         * @brief Get the Core reference
+         *
+         * @return ICore*
+         */
         ICore *getCore() const;
+
+        /**
+         * @brief Set the Core reference
+         *
+         * @param coreRef
+         */
         void setCore(ICore &coreRef);
+
+        /**
+         * @brief Initialize data for the Network module
+         *
+         */
         void init();
+
+        /**
+         * @brief Used by the SSL module to process a request then send it back
+         *
+         * @param request
+         */
         void sslRequestCallback(std::string request);
+
+        /**
+         * @brief Receives a payload from a specific module
+         *
+         * @param payload
+         * @param sender
+         */
         void receive(std::any payload, ModuleType sender);
+
+        /**
+         * @brief Load the module
+         *
+         * @param payload
+         * @return true
+         * @return false
+         */
         bool load(std::any payload);
+
+        /**
+         * @brief Unload the module
+         *
+         * @return true
+         * @return false
+         */
         bool unload();
+
+        /**
+         * @brief Get the Name of the module
+         *
+         * @return std::string
+         */
         std::string getName() const;
+
+        /**
+         * @brief Get the ModuleType of the module
+         *
+         * @return ModuleType
+         */
         ModuleType getType() const;
+
+        /**
+         * @brief Set the configuration to the module
+         *
+         * @param confKey
+         * @param server
+         */
         void setConfig(const char *confKey, sockaddr_in *server);
 
+        /**
+         * @brief Runs the Network module
+         *
+         */
         void run();
 #if(_WIN32)
+        /**
+         * @brief Process the given request using a fd (for threaded use only)
+         *
+         * @param s_conn
+         */
         void processRequest(SOCKET s_conn);
 #else
+        /**
+         * @brief Process the given request using a fd (for threaded use only)
+         *
+         * @param s_conn
+         */
         void processRequest(int s_conn);
 #endif
 };
