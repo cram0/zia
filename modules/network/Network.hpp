@@ -44,6 +44,7 @@ class ZIA_API Network : public IModule {
         Network();
         Network(ICore &coreRef);
         ~Network();
+        // Get core
         ICore *getCore() const;
         void setCore(ICore &coreRef);
         void init();

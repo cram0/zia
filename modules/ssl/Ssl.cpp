@@ -44,7 +44,6 @@ Ssl::Ssl()
 Ssl::Ssl(ICore &coreRef) : Ssl()
 {
     core = &coreRef;
-    std::cout << "SSL init : running ? " << running << std::endl;
     std::thread th(&Ssl::run, this);
     th.detach();
 }
@@ -345,7 +344,7 @@ void Ssl::run()
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
-        std::cout << "SSL Awaiting connections ..." << std::endl;
+        // std::cout << "SSL Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {

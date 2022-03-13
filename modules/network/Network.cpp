@@ -39,7 +39,6 @@ Network::Network()
 Network::Network(ICore &coreRef) : Network()
 {
     core = &coreRef;
-    std::cout << "Network init : running ? " << running << std::endl;
     std::thread th(&Network::run, this);
     th.detach();
 }
@@ -268,7 +267,7 @@ void Network::run()
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
-        std::cout << "Network Awaiting connections ..." << std::endl;
+        // std::cout << "Network Awaiting connections ..." << std::endl;
         s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
