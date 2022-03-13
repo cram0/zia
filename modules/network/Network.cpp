@@ -81,7 +81,7 @@ void Network::processRequest(int s_conn)
 
     std::string request_method, request_file, request_version;
 
-    // Debug
+
     // std::cout << recv_msg << std::endl;
 
     std::istringstream iss(recv_msg);
@@ -107,7 +107,7 @@ void Network::processRequest(int s_conn)
         return;
     }
 
-    // Debug
+
     // std::cout << request_method << " " << request_file << " " << request_version << std::endl;
 
     std::string full_path = "www" + request_file;
@@ -118,7 +118,7 @@ void Network::processRequest(int s_conn)
     std::ifstream f_data(full_path);
 
     if (f_data.is_open()) {
-        // Debug
+
         std::cout << "File exists" << std::endl;
         if (file_extension == ".php") {
             if (getCore()->getModule(ModuleType::PHP_CGI)) {
@@ -152,7 +152,7 @@ void Network::processRequest(int s_conn)
         }
     }
     else {
-        // Debug
+
         std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
@@ -199,7 +199,7 @@ void Network::run()
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != NO_ERROR) {
         wprintf(L"WSAStartup failed with error: %ld\n", iResult);
-        exit(1);
+        std::exit(1);
     }
     SOCKET s_conn;
     const char enable = 1;
@@ -219,47 +219,47 @@ void Network::run()
 
     if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
         std::cerr << "network setsockopt(SO_REUSEADDR) failed" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
         std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"Network socket failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"Network bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
 
     if (listen(s_listen, 10) == SOCKET_ERROR) {
         wprintf(L"Network listen failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
 #else
     if (s_listen == -1) {
         std::cerr << "Network Socket creation error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) < 0) {
         std::cerr << "Network Socket binding error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (listen(s_listen, 10) < 0) {
         std::cerr << "Network Socket listening error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 #endif
 

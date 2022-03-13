@@ -275,7 +275,7 @@ void Ssl::run()
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != NO_ERROR) {
         wprintf(L"WSAStartup failed with error: %ld\n", iResult);
-        exit(1);
+        std::exit(1);
     }
     SOCKET s_conn;
     const char enable = 1;
@@ -295,48 +295,48 @@ void Ssl::run()
 
     if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
         std::cerr << "setsockopt(SO_REUSEADDR) failed" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
         std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"SSL socket failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
 
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"SSL bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
 
     if (listen(s_listen, 10) == SOCKET_ERROR) {
         wprintf(L"SSL listen failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
-        exit(1);
+        std::exit(1);
     }
 #else
     if (s_listen == -1) {
         std::cerr << "SSL socket creation error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (bind(s_listen, (sockaddr *)&server, sizeof(server)) < 0) {
         std::cerr << "SSL socket binding error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 
     if (listen(s_listen, 10) < 0) {
         std::cerr << "SSL socket listening error" << std::endl;
-        exit(1);
+        std::exit(1);
     }
 #endif
 
