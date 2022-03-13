@@ -19,15 +19,49 @@ class Config : public IConfig {
     public:
         Config();
         ~Config();
+
+        /**
+         * @brief Loads config file from path
+         *
+         * @param path
+         */
         void loadConfig(const std::string &path);
+
+        /**
+         * @brief Get the Modules object list
+         *
+         * @return std::vector<ModuleType>
+         */
         std::vector<ModuleType> getModules() const;
+
+        /**
+         * @brief Get value from key given
+         *
+         * @param key
+         * @return const std::any
+         */
         const std::any operator[](const char *key);
+
+        /**
+         * @brief Checks if key is valid in config file
+         *
+         * @param key
+         * @return true
+         * @return false
+         */
         bool validKey(const char *key) const;
 
     private:
         json m_config;
 };
 
+/**
+ * @brief Checks if address is valid IPV4 format
+ *
+ * @param ip_addr
+ * @return true
+ * @return false
+ */
 static bool isValidIpv4(std::string ip_addr)
 {
     std::regex r_ipv4("(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])");
@@ -36,6 +70,13 @@ static bool isValidIpv4(std::string ip_addr)
     return false;
 }
 
+/**
+ * @brief Checks if valid port format
+ *
+ * @param port
+ * @return true
+ * @return false
+ */
 static bool isValidPort(std::string port)
 {
     std::regex r_port("^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$");

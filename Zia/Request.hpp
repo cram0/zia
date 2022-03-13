@@ -30,21 +30,68 @@ public:
             Request(int socket, const std::string &file_path, SSL *ssl);
        #endif
 
+        /**
+         * @brief Get the File Path
+         *
+         * @return const std::string
+         */
         const std::string getFilePath() const;
+
+        /**
+         * @brief Set the File Path
+         *
+         * @param file_path
+         */
         void setFilePath(const std::string &file_path);
 
+        /**
+         * @brief Get the Data
+         *
+         * @return const std::string
+         */
         const std::string getData() const;
+
+        /**
+         * @brief Set the Data to the request
+         *
+         * @param data
+         */
         void setData(const std::string &data);
 
 #if(_WIN32)
+        /**
+         * @brief Get the Socket fd
+         *
+         * @return const SOCKET
+         */
         const SOCKET getSocket() const;
 #else
+        /**
+         * @brief Get the Socket fd
+         *
+         * @return const int
+         */
         const int getSocket() const;
 #endif
+        /**
+         * @brief Set the Socket fd
+         *
+         * @param socket
+         */
+        void setSocket(int socket);
 
-    void setSocket(int socket);
-
+        /**
+         * @brief Get the Ssl object
+         *
+         * @return SSL*
+         */
         SSL *getSsl() const;
+
+        /**
+         * @brief Set the Ssl object
+         *
+         * @param ssl
+         */
         void setSsl(SSL *ssl);
         ~Request();
 
@@ -61,6 +108,10 @@ public:
         SSL* m_ssl = nullptr;
 };
 
+/**
+ * @brief Contains all the MIME-type files
+ *
+ */
 static std::unordered_map<std::string, std::string> contentTypeMap = {
     {".aac", "audio/aac"},
     {".abw", "application/x-abiword"},
@@ -130,6 +181,10 @@ static std::unordered_map<std::string, std::string> contentTypeMap = {
     {".7z", "application/x-7z-compressed"}
 };
 
+/**
+ * @brief Contains all the requests method types
+ *
+ */
 static std::vector<std::string> methodTypes = {
     {"GET"},
     {"HEAD"},
@@ -142,11 +197,24 @@ static std::vector<std::string> methodTypes = {
     {"PATCH"}
 };
 
+/**
+ * @brief Get the Content Type
+ *
+ * @param file_extension
+ * @return const std::string
+ */
 static const std::string getContentType(const std::string &file_extension)
 {
     return (contentTypeMap[file_extension]);
 }
 
+/**
+ * @brief Checks if method is valid
+ *
+ * @param method
+ * @return true
+ * @return false
+ */
 static bool isValidMethod(const std::string &method)
 {
     if (std::find(methodTypes.begin(), methodTypes.end(), method) != methodTypes.end()) {
@@ -155,6 +223,13 @@ static bool isValidMethod(const std::string &method)
     return false;
 }
 
+/**
+ * @brief Checks if HTTP version is valid for the project
+ *
+ * @param version
+ * @return true
+ * @return false
+ */
 static bool isValidHttpVersion(const std::string &version)
 {
     if (version.compare("HTTP/1.1") == 0) {

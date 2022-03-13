@@ -10,6 +10,7 @@ To read a json from stream, we simply use `std::ifstream` and deserialize.
 IMPLEMENT : https://github.com/nlohmann/json#integration
 
 ## Dependencies
+
 ## Conan
 - install [conan](https://conan.io/downloads.html)
 #### Windows
@@ -28,12 +29,13 @@ sudo apt install php-cgi
 
 ## Build Project
 
-- ### All OS
+### All OS
+
 ##### The following commands only need to be executed once when the project is cloned
 1. `git submodule update --init --recursive`
 2. `git submodule update --recursive --remote`
 
-- ### Linux/Mac (Unix)
+### Linux/Mac (Unix)
 1. `mkdir build`
 2. `cd build`
 3. `conan install .. --build=missing`
@@ -45,8 +47,9 @@ sudo apt install php-cgi
 mkdir build && cd build && conan install .. --build=missing && cmake .. -G "Unix Makefiles" -D CMAKE_BUILD_TYPE=Release && cmake --build . --config Release
 ```
 
-- ### Windows
-- install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
+### Windows
+
+Install [Visual Studio](https://visualstudio.microsoft.com/downloads/)
 
 1. `mkdir build`
 2. `cd build`
