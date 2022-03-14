@@ -106,7 +106,6 @@ void Ssl::processRequest(SOCKET s_conn)
 void Ssl::processRequest(int s_conn)
 #endif
 {
-    if (running == false) return;
 
     SSL_CTX *ctx = ssl_utils::create_context();
     ssl_utils::configure_context(ctx);

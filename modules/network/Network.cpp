@@ -65,7 +65,6 @@ void Network::processRequest(SOCKET s_conn)
 void Network::processRequest(int s_conn)
 #endif
 {
-    if (running == false) return;
 
     std::string recv_msg;
     char buf[CHUNK_SIZE] = {0};
@@ -276,7 +275,7 @@ void Network::run()
             WSACleanup();
         }
 #else
-        if (s_conn == -1 && errno == EBADF)    {
+        if (s_conn == -1 && errno == EBADF) {
             perror("Accept network error");
             running = false;
             close(s_listen);
