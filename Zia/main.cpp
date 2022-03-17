@@ -12,7 +12,7 @@
 
 int displayHelp()
 {
-    std::cout << "Help..";
+    std::cout << "Help.." << std::endl;;
     return (0);
 }
 
@@ -28,10 +28,10 @@ int main(int ac, char **av)
         std::string command = "";
         std::cout << ">> ";
         std::getline(std::cin, command);
-        if (command.compare("Update") == 0) {
+        if (command.compare("update") == 0) {
             core.loadConfig("config.json");
         }
-        if (command.compare("Exit") == 0) {
+        if (command.compare("exit") == 0) {
             running = false;
         }
     }

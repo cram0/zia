@@ -19,16 +19,56 @@ Config::~Config()
 
 }
 
+bool Config::isGoodModule(const std::string &param) const
+{
+    bool valid = false;
+    for (const auto &type : configModuleType) {
+        if (param.compare(type.c_str()) == 0) {
+            valid = true;
+        }
+    }
+    return valid;
+}
+
+bool Config::isValid(const json &config) const
+{
+    for (const auto &module : config.items())
+    {
+        if (isGoodModule(module.key())) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void Config::loadConfig(const std::string &path)
 {
     std::ifstream ifs(path);
+    json temp;
 
     if (ifs.is_open()) {
-        ifs >> m_config;
+        try
+        {
+            temp = json::parse(ifs);
+        }
+        catch (json::parse_error& e)
+        {
+            std::cout << "Not a valid config file" << std::endl;
+            std::cout << e.what() << std::endl;
+            ifs.close();
+            return;
+        }
+
+        if (isValid(temp)) {
+            m_config = temp;
+        }
+
         ifs.close();
     }
     else {
         std::cout << "Config file not found" << std::endl;
+        m_config = nullptr;
     }
 }
 

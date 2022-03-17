@@ -51,6 +51,9 @@ class Config : public IConfig {
          */
         bool validKey(const char *key) const;
 
+        bool isValid(const json &config) const;
+        bool isGoodModule(const std::string &param) const;
+
     private:
         json m_config;
 };
@@ -84,3 +87,9 @@ static bool isValidPort(std::string port)
         return true;
     return false;
 }
+
+static std::vector<std::string> configModuleType = {
+    "SSL",
+    "PhpCgi",
+    "Network"
+};

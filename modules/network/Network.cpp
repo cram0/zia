@@ -176,16 +176,20 @@ void Network::setConfig(const char *confKey, sockaddr_in *server)
     auto conf = std::any_cast<std::unordered_map<std::string, json>>((*config)[confKey]);
 
     if (conf != nullptr) {
-        if (isValidIpv4(conf["ip"]))
-            server->sin_addr.s_addr = inet_addr(conf["ip"].get<std::string>().c_str());
-        else
-            std::cout << "Invalid ipv4" << std::endl;
-        if (isValidPort(conf["port"])) {
-            std::string port = conf["port"].get<std::string>();
-            server->sin_port = htons(std::atoi(port.c_str()));
+        if (conf["ip"].type() == json::value_t::string) {
+            if (isValidIpv4(conf["ip"]))
+                server->sin_addr.s_addr = inet_addr(conf["ip"].get<std::string>().c_str());
+            else
+                std::cout << "Invalid ipv4" << std::endl;
         }
-        else
-            std::cout << "Invalid port" << std::endl;
+        if (conf["port"].type() == json::value_t::string) {
+            if (isValidPort(conf["port"])) {
+                std::string port = conf["port"].get<std::string>();
+                server->sin_port = htons(std::atoi(port.c_str()));
+            }
+            else
+                std::cout << "Invalid port" << std::endl;
+        }
     }
 }
 
