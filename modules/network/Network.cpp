@@ -225,11 +225,6 @@ void Network::run()
         std::exit(1);
     }
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
-        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-        std::exit(1);
-    }
-
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"Network socket failed with error: %ld\n", WSAGetLastError());
@@ -250,6 +245,11 @@ void Network::run()
         std::exit(1);
     }
 #else
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
+        std::exit(1);
+    }
+
     if (s_listen == -1) {
         std::cerr << "Network Socket creation error" << std::endl;
         std::exit(1);
