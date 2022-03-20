@@ -30,19 +30,19 @@ class Core : public ICore {
     public:
 
         Core();
-        ~Core();
-        void loadConfig(std::string const &path);
-        void listModules() const;
-        IConfig *getConfig() const;
-        IModule *getModule(ModuleType type) const;
+        ~Core() override;
+        void loadConfig(std::string const &path) override;
+        void listModules() const override;
+        [[nodiscard]] IConfig *getConfig() const override;
+        [[nodiscard]] IModule *getModule(ModuleType type) const override;
         void updateModule(const ModuleType &cm);
         void loadModulesFromConf(const std::vector<ModuleType> &confModules);
-        void registerModule(ModuleType type);
-        void unregisterModule(ModuleType type);
-        std::unordered_map<ModuleType, IModule *> getModules() const;
-        void send(std::any payload, ModuleType type, ModuleType receiver);
-        std::string getHomePath() const;
-        void setHomePath(const std::string &path);
-        void setPhpString(const std::string &payload);
-        std::string getPhp() const;
+        void registerModule(ModuleType type) override;
+        void unregisterModule(ModuleType type) override;
+        [[nodiscard]] std::unordered_map<ModuleType, IModule *> getModules() const override;
+        void send(std::any payload, ModuleType type, ModuleType receiver) override;
+        [[nodiscard]] std::string getHomePath() const override;
+        void setHomePath(const std::string &path) override;
+        void setPhpString(const std::string &payload) override;
+        [[nodiscard]] std::string getPhp() const override;
 };
