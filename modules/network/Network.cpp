@@ -30,6 +30,7 @@
 #include <thread>
 #include <filesystem>
 #include <utility>
+
 Network::Network() {
     type = ModuleType::NETWORK;
     name = "NetworkName";
@@ -225,7 +226,7 @@ void Network::run() {
         WSACleanup();
         std::exit(1);
     }
-    if (bind(s_listen, (sockaddr * ) & server, sizeof(server)) == SOCKET_ERROR) {
+    if (bind(s_listen, (sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"Network bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
@@ -265,7 +266,7 @@ void Network::run() {
         socklen_t sizeof_addr = sizeof(conn_addr);
 
         // std::cout << "Network Awaiting connections ..." << std::endl;
-        s_conn = accept(s_listen, (sockaddr * ) & conn_addr, &sizeof_addr);
+        s_conn = accept(s_listen, (sockaddr *) &conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
