@@ -12,13 +12,13 @@
 
 #include <regex>
 
-// SO THAT WE DONT WASTE 20 FUCKING COLUMNS BECAUSE THE NAMESPACE IS WAY TOO LONG
+// SO THAT WE DON'T WASTE 20 FUCKING COLUMNS BECAUSE THE NAMESPACE IS WAY TOO LONG
 using json = nlohmann::json;
 
 class Config : public IConfig {
     public:
         Config();
-        ~Config();
+        ~Config() override;
 
         /**
          * @brief Loads config file from path
@@ -32,7 +32,7 @@ class Config : public IConfig {
          *
          * @return std::vector<ModuleType>
          */
-        std::vector<ModuleType> getModules() const;
+        [[nodiscard]] std::vector<ModuleType> getModules() const override;
 
         /**
          * @brief Get value from key given
@@ -40,7 +40,7 @@ class Config : public IConfig {
          * @param key
          * @return const std::any
          */
-        const std::any operator[](const char *key);
+        const std::any operator[](const char *key) override;
 
         /**
          * @brief Checks if key is valid in config file
@@ -49,10 +49,10 @@ class Config : public IConfig {
          * @return true
          * @return false
          */
-        bool validKey(const char *key) const;
+        bool validKey(const char *key) const override;
 
-        bool isValid(const json &config) const;
-        bool isGoodModule(const std::string &param) const;
+        [[nodiscard]] static bool isValid(const json &config) ;
+        static bool isGoodModule(const std::string &param) ;
 
     private:
         json m_config;
@@ -65,7 +65,7 @@ class Config : public IConfig {
  * @return true
  * @return false
  */
-static bool isValidIpv4(std::string ip_addr)
+static bool isValidIpv4(const std::string& ip_addr)
 {
     std::regex r_ipv4("(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])");
     if (std::regex_match(ip_addr, r_ipv4))
@@ -80,7 +80,7 @@ static bool isValidIpv4(std::string ip_addr)
  * @return true
  * @return false
  */
-static bool isValidPort(std::string port)
+static bool isValidPort(const std::string& port)
 {
     std::regex r_port("^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$");
     if (std::regex_match(port, r_port))
