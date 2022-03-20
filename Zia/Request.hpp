@@ -35,7 +35,7 @@ public:
          *
          * @return const std::string
          */
-        const std::string getFilePath() const;
+        [[nodiscard]] const std::string getFilePath() const;
 
         /**
          * @brief Set the File Path
@@ -49,7 +49,7 @@ public:
          *
          * @return const std::string
          */
-        const std::string getData() const;
+        [[nodiscard]] const std::string getData() const;
 
         /**
          * @brief Set the Data to the request
@@ -64,7 +64,7 @@ public:
          *
          * @return const SOCKET
          */
-        const SOCKET getSocket() const;
+        [[nodiscard]] const SOCKET getSocket() const;
 #else
         /**
          * @brief Get the Socket fd
@@ -85,7 +85,7 @@ public:
          *
          * @return SSL*
          */
-        SSL *getSsl() const;
+        [[nodiscard]] SSL *getSsl() const;
 
         /**
          * @brief Set the Ssl object
@@ -99,7 +99,7 @@ public:
     private:
         std::string m_data;
         std::string m_file_path;
-        bool m_file_valid;
+        bool m_file_valid{};
 #if(_WIN32)
         SOCKET m_socket;
 #else
@@ -232,7 +232,7 @@ static bool isValidMethod(const std::string &method)
  */
 static bool isValidHttpVersion(const std::string &version)
 {
-    if (version.compare("HTTP/1.1") == 0) {
+    if (version == "HTTP/1.1") {
         return true;
     }
     return false;
