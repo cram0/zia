@@ -36,41 +36,41 @@ class ZIA_API Network : public IModule {
         ModuleType type;
         bool running;
 #if(_WIN32)
-        SOCKET s_listen;
+        SOCKET s_listen{};
 #else
         int s_listen;
 #endif
    public:
         Network();
-        Network(ICore &coreRef);
-        ~Network();
+        explicit Network(ICore &coreRef);
+        ~Network() override;
 
         /**
          * @brief Get the Core reference
          *
          * @return ICore*
          */
-        ICore *getCore() const;
+        [[nodiscard]] ICore *getCore() const override;
 
         /**
          * @brief Set the Core reference
          *
          * @param coreRef
          */
-        void setCore(ICore &coreRef);
+        void setCore(ICore &coreRef) override;
 
         /**
          * @brief Initialize data for the Network module
          *
          */
-        void init();
+        [[maybe_unused]] void init();
 
         /**
          * @brief Used by the SSL module to process a request then send it back
          *
          * @param request
          */
-        void sslRequestCallback(std::string request);
+        [[maybe_unused]] void sslRequestCallback(std::string request);
 
         /**
          * @brief Receives a payload from a specific module
@@ -78,7 +78,7 @@ class ZIA_API Network : public IModule {
          * @param payload
          * @param sender
          */
-        void receive(std::any payload, ModuleType sender);
+        void receive(std::any payload, ModuleType sender) override;
 
         /**
          * @brief Load the module
@@ -87,7 +87,7 @@ class ZIA_API Network : public IModule {
          * @return true
          * @return false
          */
-        bool load(std::any payload);
+        bool load(std::any payload) override;
 
         /**
          * @brief Unload the module
@@ -95,21 +95,21 @@ class ZIA_API Network : public IModule {
          * @return true
          * @return false
          */
-        bool unload();
+        bool unload() override;
 
         /**
          * @brief Get the Name of the module
          *
          * @return std::string
          */
-        std::string getName() const;
+        [[nodiscard]] std::string getName() const override;
 
         /**
          * @brief Get the ModuleType of the module
          *
          * @return ModuleType
          */
-        ModuleType getType() const;
+        [[nodiscard]] ModuleType getType() const override;
 
         /**
          * @brief Set the configuration to the module
@@ -117,7 +117,7 @@ class ZIA_API Network : public IModule {
          * @param confKey
          * @param server
          */
-        void setConfig(const char *confKey, sockaddr_in *server);
+        void setConfig(const char *confKey, sockaddr_in *server) const;
 
         /**
          * @brief Runs the Network module
@@ -141,6 +141,6 @@ class ZIA_API Network : public IModule {
 #endif
 };
 
-extern "C" ZIA_API Network *createNetworkModule(ICore &coreRef);
+extern "C" [[maybe_unused]]  ZIA_API Network *createNetworkModule(ICore &coreRef);
 
 #endif /* !NETWORK_HPP_ */

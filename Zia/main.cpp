@@ -10,14 +10,12 @@
 
 #include <thread>
 
-int displayHelp()
-{
+int displayHelp() {
     std::cout << "Help.." << std::endl;;
     return (0);
 }
 
-int main(int ac, char **av)
-{
+int main(int ac, char **av) {
     if (ac == 2 && av[1][0] == '-' && av[1][1] == 'h') return displayHelp();
 
     Core core;
@@ -25,13 +23,13 @@ int main(int ac, char **av)
     bool running = true;
 
     while (running) {
-        std::string command = "";
+        std::string command;
         std::cout << ">> ";
         std::getline(std::cin, command);
-        if (command.compare("update") == 0) {
+        if (command == "update") {
             core.loadConfig("config.json");
         }
-        if (command.compare("exit") == 0) {
+        if (command == "exit") {
             running = false;
         }
     }

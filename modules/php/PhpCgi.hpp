@@ -22,23 +22,22 @@
 
 class ZIA_API PhpCgi : public IModule {
     private:
-        ICore *core;
+        ICore *core{};
         std::string name;
         ModuleType type;
-        char *av[3];
     public:
         PhpCgi();
-        PhpCgi(ICore &coreRef);
-        ~PhpCgi();
-        ICore *getCore() const;
-        void setCore(ICore &coreRef);
-        void receive(std::any payload, ModuleType sender);
-        bool load(std::any payload);
-        bool unload();
-        std::string getName() const;
-        ModuleType getType() const;
+        explicit PhpCgi(ICore &coreRef);
+        ~PhpCgi() override;
+        [[nodiscard]] ICore *getCore() const override;
+        void setCore(ICore &coreRef) override;
+        void receive(std::any payload, ModuleType sender) override;
+        bool load(std::any payload) override;
+        bool unload() override;
+        [[nodiscard]] std::string getName() const override;
+        [[nodiscard]] ModuleType getType() const override;
 };
 
-extern "C" ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef);
+extern "C" [[maybe_unused]] ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef);
 
 #endif /* !PHPCGI_HPP_ */
