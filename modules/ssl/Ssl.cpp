@@ -17,21 +17,19 @@
 #include <openssl/err.h>
 
 #include <thread>
+
 #if(_WIN32)
-    #pragma comment(lib, "Ws2_32.lib")
-    // Need to link with Ws2_32.lib
+#pragma comment(lib, "Ws2_32.lib")
+// Need to link with Ws2_32.lib
 #else
-    #include <unistd.h>
 #endif
 
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <cstring>
 #include <filesystem>
 
-Ssl::Ssl()
-{
+Ssl::Ssl() {
     type = ModuleType::PHP_CGI;
     name = "SslName";
     std::cout << "Ssl created" << std::endl;
@@ -41,15 +39,13 @@ Ssl::Ssl()
     ssl_utils::init_ssl();
 }
 
-Ssl::Ssl(ICore &coreRef) : Ssl()
-{
+Ssl::Ssl(ICore &coreRef) : Ssl() {
     core = &coreRef;
     std::thread th(&Ssl::run, this);
     th.detach();
 }
 
-Ssl::~Ssl()
-{
+Ssl::~Ssl() {
     std::cout << "SSL destroyed" << std::endl;
 #if(_WIN32)
     closesocket(s_listen);
@@ -59,28 +55,23 @@ Ssl::~Ssl()
 #endif
 }
 
-void Ssl::setCore(ICore &coreRef)
-{
+void Ssl::setCore(ICore &coreRef) {
     core = &coreRef;
 }
 
-ICore *Ssl::getCore() const
-{
+ICore *Ssl::getCore() const {
     return core;
 }
 
-void Ssl::setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback)
-{
+void Ssl::setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback) {
     this->m_requestCallback = requestCallback;
 }
 
-void Ssl::sendReponse(std::string HttpsResponse)
-{
+void Ssl::sendReponse(std::string HttpsResponse) {
 
 }
 
-void Ssl::receive(std::any payload, ModuleType sender)
-{
+void Ssl::receive(std::any payload, ModuleType sender) {
     Request request = std::any_cast<Request>(payload);
 
     std::string f_extension = std::filesystem::path(request.getFilePath()).extension().string();
@@ -89,18 +80,19 @@ void Ssl::receive(std::any payload, ModuleType sender)
     stream << "HTTP/1.1 200 OK\r\n";
     stream << "Content-Length: " << request.getData().length() << "\r\n";
     if (f_extension != ".php") {
-        stream << "Content-Type: "<< getContentType(f_extension);
+        stream << "Content-Type: " << getContentType(f_extension);
         stream << "\r\n\r\n";
     }
     stream << request.getData();
 
     if (stream.str().length() > INT_MAX) {
-        std::cout << "request.getData().length() > MAXINT32 (" << stream.str().length() <<")" << std::endl;
+        std::cout << "request.getData().length() > MAXINT32 (" << stream.str().length() << ")" << std::endl;
     }
-    SSL_write(request.getSsl(), stream.str().c_str(), (int)stream.str().length());
+    SSL_write(request.getSsl(), stream.str().c_str(), (int) stream.str().length());
 }
 
 #if(_WIN32)
+
 void Ssl::processRequest(SOCKET s_conn)
 #else
 void Ssl::processRequest(int s_conn)
@@ -112,7 +104,7 @@ void Ssl::processRequest(int s_conn)
     SSL *ssl = SSL_new(ctx);
 
 
-    if (SSL_set_fd(ssl, (int)s_conn) == 0) {
+    if (SSL_set_fd(ssl, (int) s_conn) == 0) {
         std::cout << "Unable to set fd to SSL object" << std::endl;
         ERR_print_errors_fp(stderr);
 
@@ -204,20 +196,19 @@ void Ssl::processRequest(int s_conn)
         if (file_extension == ".php") {
             if (getCore()->getModule(ModuleType::PHP_CGI)) {
                 getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
-            }
-            else {
+            } else {
                 std::ostringstream response;
                 response << "HTTP/1.1 404 NOT FOUND\r\n";
                 response << "Content-Length: " << 0;
                 response << "\r\n\r\n";
 
                 if (request.getData().length() > INT_MAX) {
-                    std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() <<")" << std::endl;
+                    std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() << ")"
+                              << std::endl;
                 }
-                SSL_write(ssl, response.str().c_str(), (int)response.str().length());
+                SSL_write(ssl, response.str().c_str(), (int) response.str().length());
             }
-        }
-        else {
+        } else {
             std::stringstream data;
             data << f_data.rdbuf();
             request.setData(data.str());
@@ -225,17 +216,16 @@ void Ssl::processRequest(int s_conn)
         }
 
         f_data.close();
-    }
-    else {
+    } else {
         std::ostringstream response;
         response << "HTTP/1.1 404 NOT FOUND\r\n";
         response << "Content-Length: " << 0;
         response << "\r\n\r\n";
 
         if (request.getData().length() > INT_MAX) {
-            std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() <<")" << std::endl;
+            std::cout << "request.getData().length() > MAXINT32 (" << request.getData().length() << ")" << std::endl;
         }
-        SSL_write(ssl, response.str().c_str(), (int)response.str().length());
+        SSL_write(ssl, response.str().c_str(), (int) response.str().length());
     }
 
     ssl_utils::shutdown_ssl(ssl, ctx);
@@ -246,9 +236,8 @@ void Ssl::processRequest(int s_conn)
 #endif
 }
 
-void Ssl::setConfig(const char *confKey, sockaddr_in *server)
-{
-    Config *config = (Config *)getCore()->getConfig();
+void Ssl::setConfig(const char *confKey, sockaddr_in *server) const {
+    auto *config = (Config *) getCore()->getConfig();
     auto conf = std::any_cast<std::unordered_map<std::string, json>>((*config)[confKey]);
 
     if (conf != 0) {
@@ -259,14 +248,12 @@ void Ssl::setConfig(const char *confKey, sockaddr_in *server)
         if (isValidPort(conf["port"])) {
             std::string port = conf["port"].get<std::string>();
             server->sin_port = htons(std::atoi(port.c_str()));
-        }
-        else
+        } else
             std::cout << "Invalid port" << std::endl;
     }
 }
 
-void Ssl::run()
-{
+void Ssl::run() {
 #if(_WIN32)
     //----------------------
     // Initialize Windsock.
@@ -297,11 +284,6 @@ void Ssl::run()
         std::exit(1);
     }
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
-        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-        std::exit(1);
-    }
-
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"SSL socket failed with error: %ld\n", WSAGetLastError());
@@ -309,7 +291,7 @@ void Ssl::run()
         std::exit(1);
     }
 
-    if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
+    if (bind(s_listen, (sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"SSL bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
@@ -323,6 +305,11 @@ void Ssl::run()
         std::exit(1);
     }
 #else
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
+        std::exit(1);
+    }
+
     if (s_listen == -1) {
         std::cerr << "SSL socket creation error" << std::endl;
         std::exit(1);
@@ -339,12 +326,12 @@ void Ssl::run()
     }
 #endif
 
-    while(running) {
+    while (running) {
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
         // std::cout << "SSL Awaiting connections ..." << std::endl;
-        s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
+        s_conn = accept(s_listen, (sockaddr *) &conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
@@ -352,11 +339,11 @@ void Ssl::run()
             WSACleanup();
         }
 #else
-        if (s_conn == -1 && errno == EBADF) {
-            std::cerr << "Accept SSL error" << std::endl;
-            running = false;
-            close(s_listen);
-        }
+            if (s_conn == -1 && errno == EBADF) {
+                std::cerr << "Accept SSL error" << std::endl;
+                running = false;
+                close(s_listen);
+            }
 #endif
         else {
             std::thread th(&Ssl::processRequest, this, s_conn);
@@ -365,35 +352,31 @@ void Ssl::run()
     }
 
 #if(_WIN32)
-        closesocket(s_listen);
+    closesocket(s_listen);
 #else
-        std::cout << "SSL : Closing listening socket" << std::endl;
-        close(s_listen);
+    std::cout << "SSL : Closing listening socket" << std::endl;
+    close(s_listen);
 #endif
 }
 
-bool Ssl::load(std::any payload)
-{
+bool Ssl::load(std::any payload) {
     return true;
 }
 
-bool Ssl::unload()
-{
+bool Ssl::unload() {
     std::cout << "Unloaded SSL Module" << std::endl;
     running = false;
     return true;
 }
 
-std::string Ssl::getName() const
-{
+std::string Ssl::getName() const {
     return name;
 }
 
-ModuleType Ssl::getType() const
-{
+ModuleType Ssl::getType() const {
     return type;
 }
 
-extern "C" ZIA_API Ssl *createSslModule(ICore &coreRef) {
+extern "C" [[maybe_unused]] ZIA_API Ssl *createSslModule(ICore &coreRef) {
     return (new Ssl(coreRef));
 }

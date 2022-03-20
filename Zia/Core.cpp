@@ -10,8 +10,7 @@
 
 typedef IModule *(*IModuleDLL)(ICore &coreRef);
 
-Core::Core()
-{
+Core::Core() {
     std::cout << "Core created" << std::endl;
 
     if (config == nullptr) {
@@ -19,59 +18,49 @@ Core::Core()
     }
 }
 
-Core::~Core()
-{
+Core::~Core() {
     if (config != nullptr) {
         delete config;
     }
 }
 
-void Core::updateModule(const ModuleType &cm)
-{
+void Core::updateModule(const ModuleType &cm) {
     unregisterModule(cm);
     registerModule(cm);
 }
 
-void Core::loadModulesFromConf(const std::vector<ModuleType> &confModules)
-{
-    for (const ModuleType &cm : confModules) {
+void Core::loadModulesFromConf(const std::vector<ModuleType> &confModules) {
+    for (const ModuleType &cm: confModules) {
         if (modules.find(cm) == modules.end()) {
             registerModule(cm);
-        }
-        else {
+        } else {
             updateModule(cm);
         }
     }
 }
 
-void Core::loadConfig(std::string const &path)
-{
-    Config *config = (Config *)getConfig();
+void Core::loadConfig(std::string const &path) {
+    auto *config = (Config *) getConfig();
     config->loadConfig(path);
     loadModulesFromConf(config->getModules());
 }
 
-void Core::listModules() const
-{
+void Core::listModules() const {
 
 }
 
-IConfig *Core::getConfig() const
-{
+IConfig *Core::getConfig() const {
     return (this->config);
 }
 
-IModule *Core::getModule(ModuleType type) const
-{
+IModule *Core::getModule(ModuleType type) const {
     if (modules.find(type) == modules.end()) {
         return nullptr;
     }
     return modules.at(type);
 }
 
-void Core::registerModule(ModuleType type)
-{
-    char *error = nullptr;
+void Core::registerModule(ModuleType type) {
     IModuleDLL getIModuleDLL = nullptr;
 
 #if(_WIN32)
@@ -83,7 +72,7 @@ void Core::registerModule(ModuleType type)
             std::cout << "unable to load: " << "network.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
-        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createNetworkModule");
+        getIModuleDLL = (IModuleDLL) GetProcAddress(handle, "createNetworkModule");
         if (getIModuleDLL == nullptr) {
             std::cout << "cant get func 'createNetworkModule'" << std::endl;
             FreeLibrary(handle);
@@ -97,7 +86,7 @@ void Core::registerModule(ModuleType type)
             std::cout << "unable to load: " << "php.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
-        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createPhpCgiModule");
+        getIModuleDLL = (IModuleDLL) GetProcAddress(handle, "createPhpCgiModule");
         if (getIModuleDLL == nullptr) {
             std::cout << "cant get func 'createPhpCgiModule'" << std::endl;
             FreeLibrary(handle);
@@ -111,7 +100,7 @@ void Core::registerModule(ModuleType type)
             std::cout << "unable to load: " << "ssl.dll" << " lib" << std::endl;
             exit(EXIT_FAILURE);
         }
-        getIModuleDLL = (IModuleDLL)GetProcAddress(handle, "createSslModule");
+        getIModuleDLL = (IModuleDLL) GetProcAddress(handle, "createSslModule");
         if (getIModuleDLL == nullptr) {
             std::cout << "cant get func 'createSslModule'" << std::endl;
             FreeLibrary(handle);
@@ -151,10 +140,6 @@ void Core::registerModule(ModuleType type)
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createSslModule");
 
     }
-    if ((error = dlerror()) != NULL)  {
-            fprintf(stderr, "%s\n", error);
-            exit(EXIT_FAILURE);
-    }
 #endif
 
     IModule *pp = getIModuleDLL(*this);
@@ -163,10 +148,10 @@ void Core::registerModule(ModuleType type)
     modules_handles.emplace(std::make_pair(type, handle));
 }
 
-void Core::unregisterModule(ModuleType type)
-{
+void Core::unregisterModule(ModuleType type) {
     if (modules.find(type) == modules.end()) {
-        std::cout << "Unregistering module of type " << type << " failed, probably not in the list or already removed" << std::endl;
+        std::cout << "Unregistering module of type " << type << " failed, probably not in the list or already removed"
+                  << std::endl;
         return;
     }
     modules[type]->unload();
@@ -181,36 +166,30 @@ void Core::unregisterModule(ModuleType type)
     std::cout << "Succesfully deleted module of type " << type << std::endl;
 }
 
-std::unordered_map<ModuleType, IModule *> Core::getModules() const
-{
+std::unordered_map<ModuleType, IModule *> Core::getModules() const {
     return modules;
 }
 
-void Core::send(std::any payload, ModuleType sender, ModuleType receiver)
-{
+void Core::send(std::any payload, ModuleType sender, ModuleType receiver) {
     if (modules.find(receiver) == modules.end()) {
-        std::cout << "Send failed : module of type "<< receiver <<" not in modules list" << std::endl;
+        std::cout << "Send failed : module of type " << receiver << " not in modules list" << std::endl;
         return;
     }
     modules[receiver]->receive(payload, sender);
 }
 
-std::string Core::getHomePath() const
-{
+std::string Core::getHomePath() const {
     return homePath;
 }
 
-void Core::setHomePath(const std::string &path)
-{
+void Core::setHomePath(const std::string &path) {
     homePath = path;
 }
 
-void Core::setPhpString(const std::string &payload)
-{
+void Core::setPhpString(const std::string &payload) {
     phpString = payload;
 }
 
-std::string Core::getPhp() const
-{
+std::string Core::getPhp() const {
     return phpString;
 }

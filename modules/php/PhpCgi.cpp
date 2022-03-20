@@ -6,11 +6,11 @@
 */
 
 #define ZIA_EXPORTS
+
 #include "PhpCgi.hpp"
 #include "Request.hpp"
 
 #if(_WIN32)
-#include <io.h>
 #else
 #include <unistd.h>
 #endif
@@ -26,32 +26,24 @@ PhpCgi::PhpCgi() {
     std::cout << "PhpCgi created" << std::endl;
 }
 
-PhpCgi::PhpCgi(ICore &coreRef) : PhpCgi()
-{
+PhpCgi::PhpCgi(ICore &coreRef) : PhpCgi() {
     core = &coreRef;
 }
 
-PhpCgi::~PhpCgi()
-{
+PhpCgi::~PhpCgi() = default;
 
-}
-
-ICore *PhpCgi::getCore() const
-{
+ICore *PhpCgi::getCore() const {
     return core;
 }
 
-void PhpCgi::setCore(ICore &coreRef)
-{
+void PhpCgi::setCore(ICore &coreRef) {
     core = &coreRef;
 }
 
-void PhpCgi::receive(std::any payload, ModuleType sender)
-{
+void PhpCgi::receive(std::any payload, ModuleType sender) {
     Request request = std::any_cast<Request>(payload);
     std::string f_data;
-    size_t pread_size = 0;
-    const short CHUNK_SIZE = 4096;
+    size_t pread_size;
     char buf[CHUNK_SIZE] = {0};
 
     FILE *f;
@@ -84,26 +76,22 @@ void PhpCgi::receive(std::any payload, ModuleType sender)
         getCore()->send(request, ModuleType::PHP_CGI, ModuleType::SSL_MODULE);
 }
 
-bool PhpCgi::load(std::any payload)
-{
+bool PhpCgi::load(std::any payload) {
     return true;
 }
 
-bool PhpCgi::unload()
-{
+bool PhpCgi::unload() {
     return true;
 }
 
-std::string PhpCgi::getName() const
-{
+std::string PhpCgi::getName() const {
     return name;
 }
 
-ModuleType PhpCgi::getType() const
-{
+ModuleType PhpCgi::getType() const {
     return type;
 }
 
-extern "C" ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef) {
+extern "C" [[maybe_unused]] ZIA_API PhpCgi *createPhpCgiModule(ICore &coreRef) {
     return (new PhpCgi(coreRef));
 }

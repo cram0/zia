@@ -6,5 +6,8 @@
     "SSL" : {
         "ip" : "127.0.0.1",
         "port" : "4433"
+    },
+    "PhpCgi" : {
+        "binary" : "phpcgi"
     }
 }

@@ -6,16 +6,20 @@
 */
 
 #define ZIA_EXPORTS
+
 #include "Network.hpp"
 #include "Request.hpp"
 #include "ISsl.hpp"
 #include "Config.hpp"
 
 #if(_WIN32)
+
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+
 #pragma comment(lib, "Ws2_32.lib")
-#include <io.h>
+
+
 #else
 #include <unistd.h>
 #endif
@@ -25,10 +29,9 @@
 #include <cstring>
 #include <thread>
 #include <filesystem>
-#include <sstream>
+#include <utility>
 
-Network::Network()
-{
+Network::Network() {
     type = ModuleType::NETWORK;
     name = "NetworkName";
     std::cout << "Network created" << std::endl;
@@ -36,15 +39,13 @@ Network::Network()
     running = true;
 }
 
-Network::Network(ICore &coreRef) : Network()
-{
+Network::Network(ICore &coreRef) : Network() {
     core = &coreRef;
     std::thread th(&Network::run, this);
     th.detach();
 }
 
-Network::~Network()
-{
+Network::~Network() {
     std::cout << "Network destroyed" << std::endl;
 #if(_WIN32)
     closesocket(s_listen);
@@ -54,12 +55,12 @@ Network::~Network()
 #endif
 }
 
-void Network::init()
-{
+[[maybe_unused]] void Network::init() {
 
 }
 
 #if(_WIN32)
+
 void Network::processRequest(SOCKET s_conn)
 #else
 void Network::processRequest(int s_conn)
@@ -122,8 +123,7 @@ void Network::processRequest(int s_conn)
         if (file_extension == ".php") {
             if (getCore()->getModule(ModuleType::PHP_CGI)) {
                 getCore()->send(request, ModuleType::SSL_MODULE, ModuleType::PHP_CGI);
-            }
-            else {
+            } else {
                 std::ostringstream response;
                 response << "HTTP/1.1 404 NOT FOUND\r\n";
                 response << "Content-Length: " << 0;
@@ -131,7 +131,7 @@ void Network::processRequest(int s_conn)
 #if(_WIN32)
                 if (response.str().length() > MAXINT32)
                     throw;
-                send(s_conn, response.str().c_str(), (int)response.str().length(), 0);
+                send(s_conn, response.str().c_str(), (int) response.str().length(), 0);
                 closesocket(s_conn);
 #else
                 send(s_conn, response.str().c_str(), response.str().length(), 0);
@@ -141,16 +141,14 @@ void Network::processRequest(int s_conn)
             }
 
             f_data.close();
-        }
-        else {
+        } else {
             std::stringstream data;
             data << f_data.rdbuf();
             request.setData(data.str());
             receive(request, ModuleType::NETWORK);
             return;
         }
-    }
-    else {
+    } else {
 
         std::cout << "File doesn't exist" << std::endl;
         std::ostringstream response;
@@ -161,7 +159,7 @@ void Network::processRequest(int s_conn)
 #if(_WIN32)
         if (response.str().length() > MAXINT32)
             throw;
-        send(s_conn, response.str().c_str(), (int)response.str().length(), 0);
+        send(s_conn, response.str().c_str(), (int) response.str().length(), 0);
         closesocket(s_conn);
 #else
         send(s_conn, response.str().c_str(), response.str().length(), 0);
@@ -170,9 +168,8 @@ void Network::processRequest(int s_conn)
     }
 }
 
-void Network::setConfig(const char *confKey, sockaddr_in *server)
-{
-    Config *config = (Config *)getCore()->getConfig();
+void Network::setConfig(const char *confKey, sockaddr_in *server) const {
+    auto *config = (Config *) getCore()->getConfig();
     auto conf = std::any_cast<std::unordered_map<std::string, json>>((*config)[confKey]);
 
     if (conf != nullptr) {
@@ -186,15 +183,13 @@ void Network::setConfig(const char *confKey, sockaddr_in *server)
             if (isValidPort(conf["port"])) {
                 std::string port = conf["port"].get<std::string>();
                 server->sin_port = htons(std::atoi(port.c_str()));
-            }
-            else
+            } else
                 std::cout << "Invalid port" << std::endl;
         }
     }
 }
 
-void Network::run()
-{
+void Network::run() {
 #if(_WIN32)
     //----------------------
     // Initialize Windsock.
@@ -225,18 +220,13 @@ void Network::run()
         std::exit(1);
     }
 
-    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
-        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
-        std::exit(1);
-    }
-
 #if(_WIN32)
     if (s_listen == INVALID_SOCKET) {
         wprintf(L"Network socket failed with error: %ld\n", WSAGetLastError());
         WSACleanup();
         std::exit(1);
     }
-    if (bind(s_listen, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR) {
+    if (bind(s_listen, (sockaddr *) &server, sizeof(server)) == SOCKET_ERROR) {
         wprintf(L"Network bind failed with error: %ld\n", WSAGetLastError());
         closesocket(s_listen);
         WSACleanup();
@@ -250,6 +240,11 @@ void Network::run()
         std::exit(1);
     }
 #else
+    if (setsockopt(s_listen, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0) {
+        std::cerr << "network setsockopt(SO_REUSEPORT) failed" << std::endl;
+        std::exit(1);
+    }
+
     if (s_listen == -1) {
         std::cerr << "Network Socket creation error" << std::endl;
         std::exit(1);
@@ -266,12 +261,12 @@ void Network::run()
     }
 #endif
 
-    while(running) {
+    while (running) {
         sockaddr_in conn_addr = {0};
         socklen_t sizeof_addr = sizeof(conn_addr);
 
         // std::cout << "Network Awaiting connections ..." << std::endl;
-        s_conn = accept(s_listen, (sockaddr *)&conn_addr, &sizeof_addr);
+        s_conn = accept(s_listen, (sockaddr *) &conn_addr, &sizeof_addr);
 #if(_WIN32)
         if (s_conn == INVALID_SOCKET) {
             wprintf(L"accept failed with error: %ld\n", WSAGetLastError());
@@ -279,11 +274,11 @@ void Network::run()
             WSACleanup();
         }
 #else
-        if (s_conn == -1 && errno == EBADF) {
-            perror("Accept network error");
-            running = false;
-            close(s_listen);
-        }
+            if (s_conn == -1 && errno == EBADF) {
+                perror("Accept network error");
+                running = false;
+                close(s_listen);
+            }
 #endif
         else {
             std::thread request(&Network::processRequest, this, s_conn);
@@ -292,25 +287,22 @@ void Network::run()
     }
 
 #if(_WIN32)
-        closesocket(s_listen);
+    closesocket(s_listen);
 #else
-        std::cout << "Network : Closing listening socket" << std::endl;
-        close(s_listen);
+    std::cout << "Network : Closing listening socket" << std::endl;
+    close(s_listen);
 #endif
 }
 
-ICore *Network::getCore() const
-{
+ICore *Network::getCore() const {
     return core;
 }
 
-void Network::setCore(ICore &coreRef)
-{
+void Network::setCore(ICore &coreRef) {
     core = &coreRef;
 }
 
-void Network::receive(std::any payload, ModuleType sender)
-{
+void Network::receive(std::any payload, ModuleType sender) {
     Request request = std::any_cast<Request>(payload);
     std::string f_extension = std::filesystem::path(request.getFilePath()).extension().string();
     std::ostringstream stream;
@@ -318,14 +310,14 @@ void Network::receive(std::any payload, ModuleType sender)
     stream << "HTTP/1.1 200 OK\r\n";
     stream << "Content-Length: " << request.getData().length() << "\r\n";
     if (f_extension != ".php") {
-        stream << "Content-Type: "<< getContentType(f_extension);
+        stream << "Content-Type: " << getContentType(f_extension);
         stream << "\r\n\r\n";
     }
     stream << request.getData();
 
 #if(_WIN32)
     if (stream.str().length() > MAXINT32) throw;
-    send(request.getSocket(), stream.str().c_str(), (int)stream.str().length(), 0);
+    send(request.getSocket(), stream.str().c_str(), (int) stream.str().length(), 0);
     closesocket(request.getSocket());
 #else
     send(request.getSocket(), stream.str().c_str(), stream.str().length(), 0);
@@ -333,33 +325,28 @@ void Network::receive(std::any payload, ModuleType sender)
 #endif
 }
 
-void Network::sslRequestCallback(std::string request)
-{
-    dynamic_cast<ISsl *>(core->getModule(ModuleType::SSL_MODULE))->sendReponse(request);
+[[maybe_unused]] void Network::sslRequestCallback(std::string request) {
+    dynamic_cast<ISsl *>(core->getModule(ModuleType::SSL_MODULE))->sendReponse(std::move(request));
 }
 
-bool Network::load(std::any payload)
-{
+bool Network::load(std::any payload) {
     return true;
 }
 
-bool Network::unload()
-{
+bool Network::unload() {
     std::cout << "Unloaded module Network" << std::endl;
     running = false;
     return true;
 }
 
-std::string Network::getName() const
-{
+std::string Network::getName() const {
     return name;
 }
 
-ModuleType Network::getType() const
-{
+ModuleType Network::getType() const {
     return type;
 }
 
-extern "C" ZIA_API Network *createNetworkModule(ICore &coreRef) {
+extern "C" [[maybe_unused]] ZIA_API Network *createNetworkModule(ICore &coreRef) {
     return new Network(coreRef);
 }

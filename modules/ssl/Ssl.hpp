@@ -37,19 +37,19 @@ class ZIA_API Ssl : public IModule, public ISsl {
         ICore *core{};
         std::string name;
         ModuleType type;
-        std::function<void(std::string HttpsRequestBuffer)> m_requestCallback;
+    [[maybe_unused]] std::function<void(std::string HttpsRequestBuffer)> m_requestCallback;
         bool running;
 #if(_WIN32)
-        SOCKET s_listen;
+        SOCKET s_listen{};
 #else
         int s_listen;
 #endif
     public:
         Ssl();
-        Ssl(ICore &coreRef);
-        ~Ssl();
-        void setCore(ICore &coreRef);
-        ICore *getCore() const;
+        explicit Ssl(ICore &coreRef);
+        ~Ssl() override;
+        void setCore(ICore &coreRef) override;
+        [[nodiscard]] ICore *getCore() const override;
 
         /**
          * @brief Starts the module and listens on the set port
@@ -63,21 +63,21 @@ class ZIA_API Ssl : public IModule, public ISsl {
          * @param confKey
          * @param server
          */
-        void setConfig(const char *confKey, sockaddr_in *server);
+        void setConfig(const char *confKey, sockaddr_in *server) const;
 
         /**
          * @brief Set the Request Callback (DEPRECATED)
          *
          * @param requestCallback
          */
-        void setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback);
+        void setRequestCallback(std::function<void(std::string HttpsRequestBuffer)> requestCallback) override;
 
         /**
          * @brief Send a clear HTTP response
          *
          * @param HttpsResponse
          */
-        void sendReponse(std::string HttpsResponse);
+        void sendReponse(std::string HttpsResponse) override;
 
     #if(_WIN32)
         /**
@@ -101,7 +101,7 @@ class ZIA_API Ssl : public IModule, public ISsl {
          * @param payload
          * @param sender
          */
-        void receive(std::any payload, ModuleType sender);
+        void receive(std::any payload, ModuleType sender) override;
 
         /**
          * @brief Load the SSL module
@@ -110,7 +110,7 @@ class ZIA_API Ssl : public IModule, public ISsl {
          * @return true
          * @return false
          */
-        bool load(std::any payload);
+        bool load(std::any payload) override;
 
         /**
          * @brief Unload the SSL module
@@ -118,23 +118,23 @@ class ZIA_API Ssl : public IModule, public ISsl {
          * @return true
          * @return false
          */
-        bool unload();
+        bool unload() override;
 
         /**
          * @brief Get the Name of the module
          *
          * @return std::string
          */
-        std::string getName() const;
+        [[nodiscard]] std::string getName() const override;
 
         /**
          * @brief Get the ModuleType of the module
          *
          * @return ModuleType
          */
-        ModuleType getType() const;
+        [[nodiscard]] ModuleType getType() const override;
 };
 
-extern "C" ZIA_API Ssl *createSslModule(ICore &coreRef);
+extern "C" [[maybe_unused]] ZIA_API Ssl *createSslModule(ICore &coreRef);
 
 #endif /* !SSL_HPP_ */
