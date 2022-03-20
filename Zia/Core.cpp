@@ -140,10 +140,6 @@ void Core::registerModule(ModuleType type) {
        getIModuleDLL = (IModuleDLL)dlsym(handle, "createSslModule");
 
     }
-    if ((error = dlerror()) != NULL)  {
-            fprintf(stderr, "%s\n", error);
-            exit(EXIT_FAILURE);
-    }
 #endif
 
     IModule *pp = getIModuleDLL(*this);

@@ -25,7 +25,6 @@ class ZIA_API PhpCgi : public IModule {
         ICore *core{};
         std::string name;
         ModuleType type;
-        [[maybe_unused]] char *av[3]{};
     public:
         PhpCgi();
         explicit PhpCgi(ICore &coreRef);
